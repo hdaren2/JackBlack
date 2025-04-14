@@ -13,6 +13,7 @@ class MyApp extends StatelessWidget {
   //Jennifer Tran
   //Jessica Chan
   // Gayoon Nam
+  //Lynn Nguyen
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
