@@ -4,6 +4,7 @@ void main() {
   runApp(const MyApp());
 }
 
+//Hunter was here
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -12,6 +13,7 @@ class MyApp extends StatelessWidget {
   //Jennifer Tran
   //Jessica Chan
   // Gayoon Nam
+  //Lynn Nguyen
   //Thien-an Derek Vuong
   @override
   Widget build(BuildContext context) {
