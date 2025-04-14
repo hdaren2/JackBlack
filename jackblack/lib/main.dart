@@ -14,6 +14,7 @@ class MyApp extends StatelessWidget {
   //Jessica Chan
   // Gayoon Nam
   //Lynn Nguyen
+  //Rivers Dupaquier
   //Thien-an Derek Vuong
   @override
   Widget build(BuildContext context) {
