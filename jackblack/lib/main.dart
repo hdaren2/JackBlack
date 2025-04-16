@@ -117,6 +117,15 @@ class _MyHomePageState extends State<MyHomePage> {
               '$_counter',
               style: Theme.of(context).textTheme.headlineMedium,
             ),
+            const SizedBox(height: 20), // space between counter and button
+            ElevatedButton(
+              onPressed: () {
+                // Add functionality here
+                print('Start button pressed!');
+                // You could navigate or trigger an action here
+              },
+              child: const Text('Start'),
+            ),
           ],
         ),
       ),
