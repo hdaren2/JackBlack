@@ -75,6 +75,23 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  void _onJoinGamePressed() {
+    // Placeholder until we implement logic
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Join Game"),
+        content: const Text("Implementing logic later"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("OK"),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // This method is rerun every time setState is called, for instance as done
@@ -117,6 +134,14 @@ class _MyHomePageState extends State<MyHomePage> {
             Text(
               '$_counter',
               style: Theme.of(context).textTheme.headlineMedium,
+            ),
+            const SizedBox(height: 30),
+            ElevatedButton(
+              onPressed: _onJoinGamePressed,
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              ),
+              child: const Text("Join a Game"),
             ),
           ],
         ),
