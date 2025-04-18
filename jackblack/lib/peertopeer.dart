@@ -75,22 +75,6 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  void _onHostGamePressed() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("Host Game"),
-        content: const Text("Host game logic coming later"),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text("OK"),
-          ),
-        ],
-      ),
-    );
-  }
-
   void _onJoinGamePressed() {
     // Placeholder until we implement logic
     showDialog(
@@ -152,14 +136,6 @@ class _MyHomePageState extends State<MyHomePage> {
               style: Theme.of(context).textTheme.headlineMedium,
             ),
             const SizedBox(height: 30),
-            ElevatedButton(
-              onPressed: _onHostGamePressed,
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              ),
-              child: const Text("Host a Game"),
-            ),
-            const SizedBox(height: 12),
             ElevatedButton(
               onPressed: _onJoinGamePressed,
               style: ElevatedButton.styleFrom(
