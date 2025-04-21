@@ -15,7 +15,7 @@ class ModePage extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text("Select Game Mode", style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold),),
+            Text("Select Game Mode", textAlign: TextAlign.center, style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold),),
             SizedBox(height: 40),
             ElevatedButton(
               onPressed: () {},
