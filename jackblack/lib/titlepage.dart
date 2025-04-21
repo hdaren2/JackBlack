@@ -1,18 +1,17 @@
 import 'package:flutter/material.dart';
-import 'modepage.dart';
 
 void main() {
-  runApp(const StartPageEntry());
+  runApp(const TitlePage());
 }
 
-class StartPageEntry extends StatelessWidget {
-  const StartPageEntry({super.key});
+class TitlePage extends StatelessWidget {
+  const TitlePage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        backgroundColor: Colors.orangeAccent,
+        backgroundColor: Colors.white,
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -20,10 +19,7 @@ class StartPageEntry extends StatelessWidget {
               const Text("Jack Black Blackjack"),
               ElevatedButton(
                 onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const ModePage()),
-                  );
+                  Navigator.pushReplacementNamed(context, "mode");
                 },
                 child: const Text("Start Game"),
               ),
