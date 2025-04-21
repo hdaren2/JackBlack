@@ -1,0 +1,25 @@
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(const MaterialApp(home: FirstRoute()));
+}
+
+class FirstRoute extends StatelessWidget {
+  const FirstRoute({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: Image.asset(
+              "assets/blackjacktable.jpg",
+              fit: BoxFit.cover,
+            ),
+          ),
+        ]
+      )
+    )
+  }
+}
