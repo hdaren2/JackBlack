@@ -5,7 +5,7 @@ class P2PManager {
   RTCPeerConnection? _peerConnection;
   final _localStreamController = StreamController<MediaStream>();
   final _remoteStreamController = StreamController<MediaStream>();
-  
+
   Stream<MediaStream> get localStream => _localStreamController.stream;
   Stream<MediaStream> get remoteStream => _remoteStreamController.stream;
 
@@ -33,8 +33,9 @@ class P2PManager {
 
   Future<RTCSessionDescription> createOffer() async {
     final offer = await _peerConnection?.createOffer();
+    if (offer == null) throw Exception('Failed to create offer');
     await _peerConnection?.setLocalDescription(offer);
-    return offer!;
+    return offer;
   }
 
   Future<void> setRemoteDescription(RTCSessionDescription description) async {
@@ -47,6 +48,7 @@ class P2PManager {
 
   Future<void> createAnswer() async {
     final answer = await _peerConnection?.createAnswer();
+    if (answer == null) throw Exception('Failed to create answer');
     await _peerConnection?.setLocalDescription(answer);
     // Send this answer to the remote peer through your signaling mechanism
   }
@@ -62,7 +64,7 @@ class P2PManager {
         },
         'facingMode': 'user',
         'optional': [],
-      }
+      },
     };
 
     final stream = await navigator.mediaDevices.getUserMedia(mediaConstraints);
