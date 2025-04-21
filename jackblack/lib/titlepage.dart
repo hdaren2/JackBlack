@@ -14,10 +14,12 @@ class TitlePage extends StatelessWidget {
             children: [
               const Text(
                 "Jack Black Blackjack",
+                textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 40,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black, 
+                  color: Colors.black,
+                  fontFamily: 'Minecraft',
                 ),
               ),
               const SizedBox(height: 40),
@@ -34,7 +36,7 @@ class TitlePage extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: const Text("Start Game"),
+                child: const Text("Start Game", style: TextStyle(fontFamily: 'Minecraft')),
               ),
             ],
           ),

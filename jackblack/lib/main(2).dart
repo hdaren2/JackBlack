@@ -12,6 +12,16 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      theme: ThemeData(
+        fontFamily: 'Minecraft',
+        textTheme: const TextTheme(
+          bodyLarge: TextStyle(fontFamily: 'Minecraft'),
+          bodyMedium: TextStyle(fontFamily: 'Minecraft'),
+          titleLarge: TextStyle(fontFamily: 'Minecraft'),
+          titleMedium: TextStyle(fontFamily: 'Minecraft'),
+          titleSmall: TextStyle(fontFamily: 'Minecraft'),
+        ),
+      ),
       initialRoute: "title",
       routes: {
         "title": (context) => const TitlePage(),
