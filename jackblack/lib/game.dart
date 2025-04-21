@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'player.dart';
 
 void main() {
   runApp(const MaterialApp(home: StartPage()));
@@ -19,6 +20,32 @@ class _StartPageState extends State<StartPage> {
 
   String _gameMessage = "Welcome to Jack Black Blackjack!";
   bool _isGameOver = false;
+
+  //player option functions
+    double bet(Player p, double amount){
+    p.funds-=amount;
+    return amount;
+  }
+
+  void stand(Player p){
+    p.isStanding = true;
+  }
+
+  void hit(Player p){
+    
+  }
+
+  void surrender(Player p){
+
+  }
+
+  void split(Player p){
+
+  }
+
+  void doubleDown(Player p){
+
+  }
 
   @override
   void initState() {
