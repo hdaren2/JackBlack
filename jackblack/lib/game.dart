@@ -14,37 +14,56 @@ class StartPage extends StatefulWidget {
 }
 
 class _StartPageState extends State<StartPage> {
-  final List<String> _deck = [];
-  final List<String> _playerHand = [];
-  final List<String> _dealerHand = [];
+  final Shoe shoe = Shoe(6);
+  final Player player = Player(name: "me", funds: 1000);
+  final DealerHand dealer = DealerHand();
+  bool isPlayerTurn = true;
+  int currentHandIndex = 0;
 
   String _gameMessage = "Welcome to Jack Black Blackjack!";
-  bool _isGameOver = false;
 
-  //player option functions
-    double bet(Player p, double amount){
+  Hand get currentHand => player.hands[currentHandIndex];
+
+  void nextHand() {
+    setState(() {
+    if (currentHandIndex + 1 < player.hands.length) {
+      currentHandIndex++;
+    } else {
+      isPlayerTurn = false;
+    }
+  });
+  }
+
+  double bet(Player p,Hand h, double amount){
     p.funds-=amount;
+
     return amount;
   }
 
-  void stand(Player p){
-    p.isStanding = true;
-  }
-
-  void hit(Player p){
-    
-  }
-
-  void surrender(Player p){
-
-  }
-
-  void split(Player p){
-
-  }
-
-  void doubleDown(Player p){
-
+    //need to reorganize this
+  void _startNewGame() {
+    setState(() {
+    // Reset everything
+    player.hands.clear();
+    currentHandIndex = 0;
+    isPlayerTurn = true;
+    dealer.clear();
+    _gameMessage = "Game started";
+    // Add a new empty hand to start with
+    player.hands.add(Hand());
+    // Deal two cards to player
+    currentHand.add(shoe.dealCard());
+    currentHand.add(shoe.dealCard());
+    // Deal two cards to dealer
+    dealer.add(shoe.dealCard());
+    dealer.add(shoe.dealCard());
+    // Check for immediate blackjack
+    if (currentHand.sum() == 21) {
+      _gameMessage = "Blackjack! You win.";
+      isPlayerTurn = false;
+      // Handle payout, etc.
+    }
+  });
   }
 
   @override
@@ -53,106 +72,75 @@ class _StartPageState extends State<StartPage> {
     _startNewGame();
   }
 
-  void _startNewGame() {
-    _deck.clear();
-    _playerHand.clear();
-    _dealerHand.clear();
-    _isGameOver = false;
-    _gameMessage = "Game started!";
-
-    const suits = ['♠', '♥', '♦', '♣'];
-    const ranks = [
-      '2',
-      '3',
-      '4',
-      '5',
-      '6',
-      '7',
-      '8',
-      '9',
-      '10',
-      'J',
-      'Q',
-      'K',
-      'A',
-    ];
-
-    for (var suit in suits) {
-      for (var rank in ranks) {
-        _deck.add('$rank$suit');
-      }
-    }
-
-    _deck.shuffle(Random());
-
-    _playerHand.add(_drawCard());
-    _playerHand.add(_drawCard());
-    _dealerHand.add(_drawCard());
-    _dealerHand.add(_drawCard());
-
-    setState(() {});
-  }
-
-  String _drawCard() => _deck.removeLast();
-
-  int _calculateScore(List<String> hand) {
-    int score = 0;
-    int aceCount = 0;
-
-    for (var card in hand) {
-      String rank = card.substring(0, card.length - 1);
-      if (rank == 'A') {
-        aceCount++;
-        score += 11;
-      } else if (['K', 'Q', 'J'].contains(rank)) {
-        score += 10;
-      } else {
-        score += int.parse(rank);
-      }
-    }
-
-    while (score > 21 && aceCount > 0) {
-      score -= 10;
-      aceCount--;
-    }
-
-    return score;
-  }
 
   void _hit() {
-    if (_isGameOver) return;
-    _playerHand.add(_drawCard());
+    setState(() {
+      player.hit(currentHand, shoe);
 
-    int playerScore = _calculateScore(_playerHand);
-    if (playerScore > 21) {
-      _gameMessage = "You busted with $playerScore! Dealer wins.";
-      _isGameOver = true;
-    }
-
-    setState(() {});
+      int playerScore = currentHand.sum();
+      if (playerScore > 21) {
+        _gameMessage = "You busted with $playerScore! Dealer wins.";
+      }
+    });
   }
 
   void _stand() {
-    if (_isGameOver) return;
+    setState(() {
+      while (dealer.sum() < 17) {
+        dealer.add(shoe.dealCard());
+      }
 
-    while (_calculateScore(_dealerHand) < 17) {
-      _dealerHand.add(_drawCard());
-    }
+      int playerScore = currentHand.sum();
+      int dealerScore = dealer.sum();
 
-    int playerScore = _calculateScore(_playerHand);
-    int dealerScore = _calculateScore(_dealerHand);
+      if (dealerScore > 21 || playerScore > dealerScore) {
+        _gameMessage = "You win! $playerScore vs $dealerScore";
+        //award winnings
+      } else if (playerScore < dealerScore) {
+        _gameMessage = "Dealer wins! $dealerScore vs $playerScore";
 
-    if (dealerScore > 21 || playerScore > dealerScore) {
-      _gameMessage = "You win! $playerScore vs $dealerScore";
-    } else if (playerScore < dealerScore) {
-      _gameMessage = "Dealer wins! $dealerScore vs $playerScore";
-    } else {
-      _gameMessage = "It's a tie! $playerScore vs $dealerScore";
-    }
+      } else {
+        _gameMessage = "It's a tie! $playerScore vs $dealerScore";
 
-    _isGameOver = true;
-    setState(() {});
+      }
+
+      nextHand();
+    });
   }
+
+  void _surrender(){
+    //discard bet and hand
+    nextHand();
+  }
+
+  void _doubleDown(){
+    setState(() {
+      if(currentHand.sum()<=11)
+        player.doubleDown(currentHand);
+    });
+    //check sum
+    nextHand();
+  }
+
+  void _insurance(){
+    int dealerLength = dealer.hand.length;
+    if(dealerLength==1){
+      String dealerSuit = dealer.hand[0].suit;
+      if(dealerSuit=="A")
+        player.insurance(currentHand);
+    }
+  }
+
+  void _split(){
+    int handLength = currentHand.hand.length;
+    if(handLength==2){
+      int c1 = currentHand.hand[0].value;
+      int c2 = currentHand.hand[1].value;
+      if(c1==c2)
+        player.split(currentHand);
+    }
+  }
+  
 
   @override
   Widget build(BuildContext context) {
@@ -169,11 +157,11 @@ class _StartPageState extends State<StartPage> {
                 style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
               ),
               Text(
-                "Dealer: ${_dealerHand.join(', ')}",
+                "Dealer: ${dealer.toString()}",
                 style: TextStyle(fontSize: 18),
               ),
               Text(
-                "Player: ${_playerHand.join(', ')}",
+                "Player: ${currentHand.toString()}",
                 style: TextStyle(fontSize: 18),
               ),
               Text(
@@ -185,12 +173,28 @@ class _StartPageState extends State<StartPage> {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   ElevatedButton(
-                    onPressed: _isGameOver ? null : _hit,
+                    onPressed: isPlayerTurn ?_hit : null,
                     child: const Text("Hit"),
                   ),
                   ElevatedButton(
-                    onPressed: _isGameOver ? null : _stand,
+                    onPressed: isPlayerTurn ? _stand : null,
                     child: const Text("Stand"),
+                  ),
+                  ElevatedButton(
+                    onPressed: isPlayerTurn ? _surrender : null,
+                    child: const Text("Surrender"),
+                  ),
+                  ElevatedButton(
+                    onPressed: isPlayerTurn ? _doubleDown : null,
+                    child: const Text("Double Down"),
+                  ),
+                  ElevatedButton(
+                    onPressed: isPlayerTurn ? _insurance : null,
+                    child: const Text("Insurance"),
+                  ),
+                  ElevatedButton(
+                    onPressed: isPlayerTurn ? _split : null,
+                    child: const Text("Split"),
                   ),
                   ElevatedButton(
                     onPressed: _startNewGame,
