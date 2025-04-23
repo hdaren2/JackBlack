@@ -1,69 +1,66 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
-import 'player.dart';
+import 'package:jackblack/card.dart';
+import 'package:jackblack/shoe.dart';
+import 'package:jackblack/hand.dart';
+import 'package:jackblack/player.dart';
 
-void main() {
-  runApp(const MaterialApp(home: StartPage()));
-}
-
-class StartPage extends StatefulWidget {
-  const StartPage({super.key});
+class GamePage extends StatefulWidget {
+  const GamePage({super.key});
 
   @override
-  State<StartPage> createState() => _StartPageState();
+  State<GamePage> createState() => _GamePageState();
 }
 
-class _StartPageState extends State<StartPage> {
+class _GamePageState extends State<GamePage> {
   final Shoe shoe = Shoe(6);
-  final Player player = Player(name: "me", funds: 1000);
+  final Player player = Player(name: "Player", funds: 1000);
   final DealerHand dealer = DealerHand();
   bool isPlayerTurn = true;
-  int currentHandIndex = 0;
+  int curHandIndex = 0;
 
   String _gameMessage = "Welcome to Jack Black Blackjack!";
 
-  Hand get currentHand => player.hands[currentHandIndex];
+  Hand get curHand => player.hands[curHandIndex];
 
   void nextHand() {
     setState(() {
-    if (currentHandIndex + 1 < player.hands.length) {
-      currentHandIndex++;
-    } else {
-      isPlayerTurn = false;
-    }
-  });
+      if (curHandIndex + 1 < player.hands.length) {
+        curHandIndex++;
+      } else {
+        isPlayerTurn = false;
+      }
+    });
   }
 
-  double bet(Player p,Hand h, double amount){
+  double bet(Player p, Hand h, double amount) {
     p.funds-=amount;
-
     return amount;
   }
 
-    //need to reorganize this
+  // Need to reorganize this
   void _startNewGame() {
     setState(() {
-    // Reset everything
-    player.hands.clear();
-    currentHandIndex = 0;
-    isPlayerTurn = true;
-    dealer.clear();
-    _gameMessage = "Game started";
-    // Add a new empty hand to start with
-    player.hands.add(Hand());
-    // Deal two cards to player
-    currentHand.add(shoe.dealCard());
-    currentHand.add(shoe.dealCard());
-    // Deal two cards to dealer
-    dealer.add(shoe.dealCard());
-    dealer.add(shoe.dealCard());
-    // Check for immediate blackjack
-    if (currentHand.sum() == 21) {
-      _gameMessage = "Blackjack! You win.";
-      isPlayerTurn = false;
-      // Handle payout, etc.
-    }
-  });
+      // Reset everything
+      player.hands.clear();
+      curHandIndex = 0;
+      isPlayerTurn = true;
+      dealer.clear();
+      _gameMessage = "Game Started";
+      // Add a new empty hand to start with
+      player.hands.add(Hand());
+      // Deal two cards to player
+      curHand.add(shoe.deal());
+      curHand.add(shoe.deal());
+      // Deal two cards to dealer
+      dealer.add(shoe.deal());
+      dealer.add(shoe.deal());
+      // Check for immediate blackjack
+      if (curHand.sum == 21) {
+        _gameMessage = "Blackjack! You win.";
+        isPlayerTurn = false;
+        // Handle payout, etc.
+      }
+    });
   }
 
   @override
@@ -75,9 +72,9 @@ class _StartPageState extends State<StartPage> {
 
   void _hit() {
     setState(() {
-      player.hit(currentHand, shoe);
+      player.hit(curHand, shoe);
 
-      int playerScore = currentHand.sum();
+      int playerScore = curHand.sum;
       if (playerScore > 21) {
         _gameMessage = "You busted with $playerScore! Dealer wins.";
       }
@@ -86,88 +83,89 @@ class _StartPageState extends State<StartPage> {
 
   void _stand() {
     setState(() {
-      while (dealer.sum() < 17) {
-        dealer.add(shoe.dealCard());
+      while (dealer.sum < 17) {
+        dealer.add(shoe.deal());
       }
 
-      int playerScore = currentHand.sum();
-      int dealerScore = dealer.sum();
+      int playerScore = curHand.sum;
+      int dealerScore = dealer.sum;
 
       if (dealerScore > 21 || playerScore > dealerScore) {
         _gameMessage = "You win! $playerScore vs $dealerScore";
-        //award winnings
-      } else if (playerScore < dealerScore) {
-        _gameMessage = "Dealer wins! $dealerScore vs $playerScore";
-
-      } else {
-        _gameMessage = "It's a tie! $playerScore vs $dealerScore";
-
+        // Award winnings
       }
-
+      else if (playerScore < dealerScore) {
+        _gameMessage = "Dealer wins! $dealerScore vs $playerScore";
+      }
+      else {
+        _gameMessage = "It's a tie! $playerScore vs $dealerScore";
+      }
       nextHand();
     });
   }
 
   void _surrender(){
-    //discard bet and hand
+    // Discard bet and hand
     nextHand();
   }
 
   void _doubleDown(){
     setState(() {
-      if(currentHand.sum()<=11)
-        player.doubleDown(currentHand);
+      if(curHand.sum <= 11)
+        player.doubleDown(curHand);
     });
-    //check sum
+    // Check sum
     nextHand();
   }
 
   void _insurance(){
     int dealerLength = dealer.hand.length;
-    if(dealerLength==1){
+    if(dealerLength == 1){
       String dealerSuit = dealer.hand[0].suit;
-      if(dealerSuit=="A")
-        player.insurance(currentHand);
+      if (dealerSuit == "A") {
+        player.insurance(curHand);
+      }
     }
   }
 
-  void _split(){
-    int handLength = currentHand.hand.length;
-    if(handLength==2){
-      int c1 = currentHand.hand[0].value;
-      int c2 = currentHand.hand[1].value;
-      if(c1==c2)
-        player.split(currentHand);
+  // Check this with new card class value parameter
+  void _split() {
+    int handLength = curHand.hand.length;
+    if(handLength==2) {
+      int c1 = curHand.hand[0].value;
+      int c2 = curHand.hand[1].value;
+      if(c1 == c2) {
+        player.split(curHand);
+      }
     }
   }
   
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.orangeAccent,
-      body: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Center(
+      backgroundColor: Color.fromRGBO(33, 126, 75, 1),
+      body: Center(
+        child: Container(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
+              Image.asset('assets/logo.PNG', scale: 2),
               Text(
-                "Jack Black Blackjack",
-                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                "Dealer"
+              ),
+              Wrap(
+                spacing: 8,
+                children: dealer.hand.map((card) => PlayingCardWidget(card: card)).toList(),
               ),
               Text(
-                "Dealer: ${dealer.toString()}",
-                style: TextStyle(fontSize: 18),
+                "Player"
               ),
-              Text(
-                "Player: ${currentHand.toString()}",
-                style: TextStyle(fontSize: 18),
+              Wrap(
+                spacing: 8,
+                children: curHand.hand.map((card) => PlayingCardWidget(card: card)).toList(),
               ),
               Text(
                 _gameMessage,
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -200,7 +198,7 @@ class _StartPageState extends State<StartPage> {
                     onPressed: _startNewGame,
                     child: const Text("New Game"),
                   ),
-                ],
+                ]
               ),
             ],
           ),

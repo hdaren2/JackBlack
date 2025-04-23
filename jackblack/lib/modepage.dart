@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jackblack/game2.dart';
 
 void main() {
   runApp(const MaterialApp(home: ModePage()));
@@ -10,7 +11,7 @@ class ModePage extends StatelessWidget {
   @override
   Widget build (BuildContext context) {
     return Scaffold(
-      backgroundColor: Color.fromRGBO(89, 148, 87, 1),
+      backgroundColor: Color.fromRGBO(33, 126, 75, 1),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -18,12 +19,14 @@ class ModePage extends StatelessWidget {
             Text("Select Game Mode", textAlign: TextAlign.center, style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold),),
             SizedBox(height: 40),
             ElevatedButton(
-              onPressed: () {},
+              onPressed: () {
+                Navigator.push(context, MaterialPageRoute(builder: (context) => GamePage()));
+              },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Color.fromRGBO(198, 255, 202, 1),
                 foregroundColor: Color.fromRGBO(0, 0, 0, 1),
               ),
-              child: Text("Play Against Bots"),
+              child: Text("Play Against Dealer"),
             ),
             SizedBox(height: 40),
             ElevatedButton(
