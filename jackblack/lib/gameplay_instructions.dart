@@ -87,6 +87,20 @@ class GameplayInstructions extends StatelessWidget {
                 fontSize: 16,
                 fontFamily: 'Minecraft',),
             ),
+            SizedBox(height: 8),
+            Text(
+              '- Surrendering allows the player to forfeit theird hand and recieve half their bet back instead of losing the full amount',
+              style: TextStyle(
+                fontSize: 16,
+                fontFamily: 'Minecraft',),
+            ),
+            SizedBox(height: 8),
+            Text(
+              '- Splitting allows the player to split their hand into two hands if they have two cards of the same value.',
+              style: TextStyle(
+                fontSize: 16,
+                fontFamily: 'Minecraft',),
+            ),
             SizedBox(height: 16),
             Text(
               'How Betting works',
@@ -120,6 +134,13 @@ class GameplayInstructions extends StatelessWidget {
             SizedBox(height: 8),
             Text(
               '- In the instance that a player doubles their bet, they will only receive one additional card.',
+              style: TextStyle(
+                fontSize: 16,
+                fontFamily: 'Minecraft',),
+            ),
+            SizedBox(height: 8),
+            Text(
+              '- Insurance is a side bet that the dealer has a blackjack. It is offered when the dealer\'s upcard is an Ace.',
               style: TextStyle(
                 fontSize: 16,
                 fontFamily: 'Minecraft',),
