@@ -1,46 +1,47 @@
-
-class Card {
-  String rank;
-  String suit;
-
-  Card({required this.rank, required this.suit});
-
-  int get value {
-    if (rank == 'A') return 11;
-    if (['K', 'Q', 'J'].contains(rank)) return 10;
-    return int.tryParse(rank) ?? 0;
-  }
-}
+import 'shoe.dart';
+import 'hand.dart';
 
 class Player {
   final String name;
   double funds;
-  List<Card> hand = [];
+  List<Hand> hands = []; //multiple hands in case splitting
   //will add stats and way to keep track of them
 
-  bool isStanding = false;
-  bool isBusted = false;
 
-  double currentBet = 0.0;
+  Player({required this.name, required this.funds}) ;
 
-  Player({required this.name, required this.funds});
-
-  int handSum() {
-    int sum = 0;
-    int aceCount = 0;
-
-    for (Card c in hand) {
-        sum += c.value;
-    }
-    //accounts for aces
-    while (sum > 21 && aceCount > 0) {
-      sum -= 10;
-      aceCount--;
-    }
-    return sum;
+  void stand(Hand h){
+    h.isStanding = true;
   }
 
-  void handAdd(Card c){
-    hand.add(c);
+  void hit(Hand h, Shoe d){
+    h.add(d.dealCard());
   }
+
+  void surrender(Hand h){
+    h.isSurrendered = true;
+    h.bet = 0;
+  }
+
+  void split(Hand h){
+    //first two cards must have same value
+    Card two = h.hand.removeLast();
+    Hand second = Hand();
+    second.add(two);
+    hands.add(second);
+  }
+
+  void doubleDown(Hand h){
+    //must be on first two cards
+    funds-=h.bet;
+    h.bet+=h.bet;
+  }
+
+  void insurance(Hand h){
+    //if dealers upcard is ace
+    double insurance = h.bet/2;
+    funds-=insurance;
+    h.insurance+=insurance;
+  }
+
 }
