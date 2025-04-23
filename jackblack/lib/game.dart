@@ -13,7 +13,7 @@ class GamePage extends StatefulWidget {
 
 class _GamePageState extends State<GamePage> {
   final Shoe shoe = Shoe(6);
-  final Player player = Player(name: "Player", funds: 1000);
+  final Player player = Player(name: "Player", funds: 1000.0);
   final DealerHand dealer = DealerHand();
   bool isPlayerTurn = true;
   int curHandIndex = 0;
@@ -42,12 +42,23 @@ class _GamePageState extends State<GamePage> {
     setState(() {
       // Reset everything
       player.hands.clear();
+      dealer.clear();
+      player.addEmptyHand();
       curHandIndex = 0;
       isPlayerTurn = true;
-      dealer.clear();
-      _gameMessage = "Game Started";
-      // Add a new empty hand to start with
-      player.hands.add(Hand());
+      _gameMessage = "Welcome! Please make a bet to start";   
+      _firstDeal();   
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _startNewGame();
+  }
+
+  void _firstDeal(){
+    setState(() {
       // Deal two cards to player
       curHand.add(shoe.deal());
       curHand.add(shoe.deal());
@@ -58,17 +69,34 @@ class _GamePageState extends State<GamePage> {
       if (curHand.sum == 21) {
         _gameMessage = "Blackjack! You win.";
         isPlayerTurn = false;
-        // Handle payout, etc.
+        player.funds+=(curHand.bet * 3/2);
       }
     });
   }
 
-  @override
-  void initState() {
-    super.initState();
-    _startNewGame();
+  void _bet(double amount){
+    setState(() {
+      player.bet(curHand, amount);
+    });
   }
 
+  void _checkBust(){
+    setState(() {
+      int playerScore = curHand.sum;
+      int dealerScore = dealer.sum;
+      if (dealerScore > 21 || playerScore > dealerScore) {
+          _gameMessage = "You win! $playerScore vs $dealerScore";
+          player.funds+=2*curHand.bet;
+        }
+        else if (playerScore < dealerScore) {
+          _gameMessage = "Dealer wins! $dealerScore vs $playerScore";
+        }
+        else {
+          _gameMessage = "It's a tie! $playerScore vs $dealerScore";
+          player.funds+=curHand.bet;
+        }
+    });
+  }
 
   void _hit() {
     setState(() {
@@ -77,6 +105,7 @@ class _GamePageState extends State<GamePage> {
       int playerScore = curHand.sum;
       if (playerScore > 21) {
         _gameMessage = "You busted with $playerScore! Dealer wins.";
+        nextHand();
       }
     });
   }
@@ -86,20 +115,7 @@ class _GamePageState extends State<GamePage> {
       while (dealer.sum < 17) {
         dealer.add(shoe.deal());
       }
-
-      int playerScore = curHand.sum;
-      int dealerScore = dealer.sum;
-
-      if (dealerScore > 21 || playerScore > dealerScore) {
-        _gameMessage = "You win! $playerScore vs $dealerScore";
-        // Award winnings
-      }
-      else if (playerScore < dealerScore) {
-        _gameMessage = "Dealer wins! $dealerScore vs $playerScore";
-      }
-      else {
-        _gameMessage = "It's a tie! $playerScore vs $dealerScore";
-      }
+      _checkBust();
       nextHand();
     });
   }
@@ -119,25 +135,30 @@ class _GamePageState extends State<GamePage> {
   }
 
   void _insurance(){
-    int dealerLength = dealer.hand.length;
-    if(dealerLength == 1){
-      String dealerSuit = dealer.hand[0].suit;
-      if (dealerSuit == "A") {
-        player.insurance(curHand);
+    setState(() {
+      int dealerLength = dealer.hand.length;
+      if(dealerLength == 1){
+        String dealerSuit = dealer.hand[0].suit;
+        if (dealerSuit == "A") {
+          player.insurance(curHand);
+        }
       }
-    }
+    });
   }
 
   // Check this with new card class value parameter
   void _split() {
-    int handLength = curHand.hand.length;
-    if(handLength==2) {
-      int c1 = curHand.hand[0].value;
-      int c2 = curHand.hand[1].value;
-      if(c1 == c2) {
-        player.split(curHand);
+    setState(() {
+      int handLength = curHand.hand.length;
+      if(handLength==2) {
+        int c1 = curHand.hand[0].value;
+        int c2 = curHand.hand[1].value;
+        if(c1 == c2) {
+          player.split(curHand);
+          _gameMessage = "You split the hand, play your first hand first";
+        }
       }
-    }
+    });
   }
   
   @override
@@ -155,43 +176,56 @@ class _GamePageState extends State<GamePage> {
               ),
               Wrap(
                 spacing: 8,
-                children: dealer.hand.map((card) => PlayingCardWidget(card: card)).toList(),
+                children: (curHand.bet>0) ? dealer.hand.map((card) => PlayingCardWidget(card: card)).toList() : [],
               ),
               Text(
                 "Player"
               ),
               Wrap(
                 spacing: 8,
-                children: curHand.hand.map((card) => PlayingCardWidget(card: card)).toList(),
+                children: (curHand.bet>0) ? curHand.hand.map((card) => PlayingCardWidget(card: card)).toList() : [],
               ),
               Text(
                 _gameMessage,
               ),
+              Wrap(
+                alignment: WrapAlignment.center,
+                children: [
+                  for (var value in [1, 5, 10, 25, 50, 100])
+                    ElevatedButton(
+                      onPressed: () => _bet(value.toDouble()),
+                      child: Text("\$$value"),
+                    ),
+                ],
+              ),
+              Text("Sum: ${curHand.sum}"),
+              Text("Bet: ${curHand.bet}"),
+              Text("Funds: ${player.funds}"),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   ElevatedButton(
-                    onPressed: isPlayerTurn ?_hit : null,
+                    onPressed: (isPlayerTurn && curHand.bet>0) ?_hit : null,
                     child: const Text("Hit"),
                   ),
                   ElevatedButton(
-                    onPressed: isPlayerTurn ? _stand : null,
+                    onPressed: (isPlayerTurn && curHand.bet>0) ? _stand : null,
                     child: const Text("Stand"),
                   ),
                   ElevatedButton(
-                    onPressed: isPlayerTurn ? _surrender : null,
+                    onPressed: (isPlayerTurn && curHand.bet>0) ? _surrender : null,
                     child: const Text("Surrender"),
                   ),
                   ElevatedButton(
-                    onPressed: isPlayerTurn ? _doubleDown : null,
+                    onPressed: (isPlayerTurn && curHand.bet>0) ? _doubleDown : null,
                     child: const Text("Double Down"),
                   ),
                   ElevatedButton(
-                    onPressed: isPlayerTurn ? _insurance : null,
+                    onPressed: (isPlayerTurn && curHand.bet>0) ? _insurance : null,
                     child: const Text("Insurance"),
                   ),
                   ElevatedButton(
-                    onPressed: isPlayerTurn ? _split : null,
+                    onPressed: (isPlayerTurn && curHand.bet>0) ? _split : null,
                     child: const Text("Split"),
                   ),
                   ElevatedButton(

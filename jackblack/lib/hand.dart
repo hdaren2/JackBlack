@@ -16,16 +16,9 @@ class DealerHand {
       }*/
       //sum += c.value;
       var rank = c.rank;
-      if (rank == 'A') {
+      if (rank == 'A')
         aceCount++;
-        sum += 11;
-      }
-      else if (['J', 'Q', 'K'].contains(rank)) {
-        sum += 10;
-      }
-      else {
-        sum += int.parse(rank);
-      }
+      sum += c.value;
     }
     while (sum > 21 && aceCount > 0) {
       sum -= 10;

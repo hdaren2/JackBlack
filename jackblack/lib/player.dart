@@ -13,6 +13,17 @@ class Player {
     required this.funds
   });
 
+  double bet(Hand h, double bet){
+    funds -= bet;
+    h.bet += bet;
+    return bet;
+  }
+
+  void addEmptyHand(){
+    Hand h = Hand();
+    hands.add(h);
+  }
+
   void stand(Hand h){
     h.isStanding = true;
   }
@@ -31,14 +42,14 @@ class Player {
     // First two cards must have same value
     PlayingCard two = h.hand.removeLast();
     Hand second = Hand();
+    bet(second, h.bet);
     second.add(two);
     hands.add(second);
   }
 
   void doubleDown(Hand h){
     // Must be on first two cards
-    funds -= h.bet;
-    h.bet += h.bet;
+    bet(h, h.bet);
   }
 
   void insurance(Hand h){

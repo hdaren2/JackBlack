@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 
 class PlayingCard {
   // HRT, DMD, CLB, SPD
-  final suit;
+  final String suit;
   // A, 2, 3, 4, 5, 6, 7, 8, 9, J, Q, K
-  final rank;
+  final String rank;
   // May not need value
-  final value;
+  //final value;
   final String asset;
 
   PlayingCard({
@@ -14,9 +14,17 @@ class PlayingCard {
     required this.rank,
     // May not need value, use set value function to switch between 1 and 11 for ace?
     // May not need because we'll have a function in player hand to calculate value
-    this.value,
+    //this.value,
     String? asset,
   }) : asset = asset ?? 'assets/cards/$suit$rank.png';
+
+  int get value {
+    if (rank == 'A') 
+      return 11;
+    if (['K', 'Q', 'J'].contains(rank)) 
+      return 10;
+    return int.parse(rank);
+  }
 }
 
 class PlayingCardWidget extends StatelessWidget {
