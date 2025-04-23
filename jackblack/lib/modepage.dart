@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:jackblack/game2.dart';
+import 'package:jackblack/game.dart';
 
 void main() {
   runApp(const MaterialApp(home: ModePage()));
