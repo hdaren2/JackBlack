@@ -1,0 +1,180 @@
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(const MaterialApp(home: FirstRoute()));
+}
+
+class FirstRoute extends StatelessWidget {
+  const FirstRoute({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: CustomPaint(
+              painter: BlackjackTablePainter(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class BlackjackTablePainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    // Create the main table color (dark green felt)
+    final tablePaint = Paint()
+      ..color = const Color(0xFF58181F)
+      ..style = PaintingStyle.fill;
+
+    // Draw the main table
+    canvas.drawRect(
+      Rect.fromLTWH(0, 0, size.width, size.height),
+      tablePaint,
+    );
+
+    // Draw the table border
+    final borderPaint = Paint()
+      ..color = Colors.brown[800]!
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 20.0;
+
+    canvas.drawRect(
+      Rect.fromLTWH(10, 10, size.width - 20, size.height - 20),
+      borderPaint,
+    );
+
+    // Draw some decorative elements
+    final decorationPaint = Paint()
+      ..color = Colors.black
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0;
+
+    // Draw some curved lines for decoration
+    final path = Path()
+      ..moveTo(size.width * 0.2, size.height * 0.3)
+      ..quadraticBezierTo(
+        size.width * 0.5,
+        size.height * 0.2,
+        size.width * 0.8,
+        size.height * 0.3,
+      );
+
+    canvas.drawPath(path, decorationPaint);
+
+    // Draw player position rectangles
+    final playerPaint = Paint()
+      ..color = Colors.black
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 3.0;
+
+    // Number of player positions
+    const int numPositions = 7;
+    final double rectWidth = size.width * 0.08;
+    final double rectHeight = size.height * 0.25;
+    final double spacing = size.width * 0.02;
+
+    // Calculate the curve parameters
+    final double startX = size.width * 0.1;
+    final double endX = size.width * 0.9;
+    final double controlY = size.height * 0.7;
+    final double bottomY = size.height * 0.85;
+
+    for (int i = 0; i < numPositions; i++) {
+      // Calculate position along the curve
+      final double t = i / (numPositions - 1);
+      final double x = startX + (endX - startX) * t;
+      final double y = bottomY - (bottomY - controlY) * (1 - (2 * t - 1) * (2 * t - 1));
+
+      // Draw rounded rectangle
+      final rect = RRect.fromRectAndRadius(
+        Rect.fromLTWH(
+          x - rectWidth / 2,
+          y - rectHeight / 2,
+          rectWidth,
+          rectHeight,
+        ),
+        const Radius.circular(15),
+      );
+
+      canvas.drawRRect(rect, playerPaint);
+    }
+
+    // Draw curved "JACKBLACK" text
+    final textPaint = Paint()
+      ..color = Colors.black
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0;
+
+    const String text = "JACKBLACK";
+    final double textSize = size.width * 0.08;
+    final double textY = size.height * 0.25;
+
+    // Create a path for the curved text
+    final textPath = Path();
+    textPath.moveTo(size.width * 0.2, textY);
+    textPath.quadraticBezierTo(
+      size.width * 0.5,
+      textY - size.height * 0.1,
+      size.width * 0.8,
+      textY,
+    );
+
+    // Draw the text along the path
+    final textStyle = TextStyle(
+      color: Colors.black,
+      fontSize: textSize,
+      fontWeight: FontWeight.bold,
+    );
+
+    final textPainter = TextPainter(
+      text: TextSpan(
+        text: text,
+        style: textStyle,
+      ),
+      textDirection: TextDirection.ltr,
+    );
+
+    textPainter.layout();
+
+    // Calculate the path metrics
+    final pathMetrics = textPath.computeMetrics().first;
+    final pathLength = pathMetrics.length;
+    final textWidth = textPainter.width;
+    final startOffset = (pathLength - textWidth) / 2;
+
+    // Draw the text along the path
+    for (int i = 0; i < text.length; i++) {
+      final double charWidth = textPainter.width / text.length;
+      final double charOffset = startOffset + (i * charWidth);
+      
+      final tangent = pathMetrics.getTangentForOffset(charOffset);
+      if (tangent != null) {
+        canvas.save();
+        canvas.translate(tangent.position.dx, tangent.position.dy);
+        canvas.rotate(tangent.angle);
+        
+        final charSpan = TextSpan(
+          text: text[i],
+          style: textStyle,
+        );
+        
+        final charPainter = TextPainter(
+          text: charSpan,
+          textDirection: TextDirection.ltr,
+        );
+        
+        charPainter.layout();
+        charPainter.paint(canvas, Offset(-charWidth / 2, -textSize / 2));
+        canvas.restore();
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
