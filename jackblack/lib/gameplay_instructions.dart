@@ -110,6 +110,20 @@ class GameplayInstructions extends StatelessWidget {
                 fontSize: 16,
                 fontFamily: 'Minecraft',),
             ),
+            SizedBox(height: 8),
+            Text(
+              '- Players can choose to double their bet after receiving their first two cards.',
+              style: TextStyle(
+                fontSize: 16,
+                fontFamily: 'Minecraft',),
+            ),
+            SizedBox(height: 8),
+            Text(
+              '- In the instance that a player doubles their bet, they will only receive one additional card.',
+              style: TextStyle(
+                fontSize: 16,
+                fontFamily: 'Minecraft',),
+            )
           ],
         ),
       ),
