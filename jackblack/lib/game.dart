@@ -17,6 +17,9 @@ class _GamePageState extends State<GamePage> {
   final DealerHand dealer = DealerHand();
   bool isPlayerTurn = true;
   int curHandIndex = 0;
+  bool hasBet = false;
+  bool isGameEnding = false;
+  bool isTransitioning = false;
 
   String _gameMessage = "Welcome to Jack Black Blackjack!";
 
@@ -37,7 +40,6 @@ class _GamePageState extends State<GamePage> {
     return amount;
   }
 
-  // Need to reorganize this
   void _startNewGame() {
     setState(() {
       // Reset everything
@@ -46,8 +48,72 @@ class _GamePageState extends State<GamePage> {
       player.addEmptyHand();
       curHandIndex = 0;
       isPlayerTurn = true;
+      hasBet = false;
+      isGameEnding = false;
+      isTransitioning = false;
       _gameMessage = "Welcome! Please make a bet to start";   
-      _firstDeal();   
+    });
+  }
+
+  void _showLeaveConfirmation() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(
+            'Leave Game?',
+            style: TextStyle(
+              fontFamily: 'Minecraft',
+              color: Colors.red,
+            ),
+          ),
+          content: Text(
+            'Are you sure you want to leave the game and forfeit the current round?',
+            style: TextStyle(
+              fontFamily: 'Minecraft',
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close dialog
+              },
+              child: Text(
+                'No',
+                style: TextStyle(
+                  fontFamily: 'Minecraft',
+                  color: Colors.red,
+                ),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close dialog
+                _endGame();
+              },
+              child: Text(
+                'Yes',
+                style: TextStyle(
+                  fontFamily: 'Minecraft',
+                  color: Colors.green,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _endGame() {
+    setState(() {
+      isGameEnding = true;
+      isTransitioning = true;
+      _gameMessage = "Game ended. Returning to main menu...";
+      // Add a delay before returning to main menu
+      Future.delayed(const Duration(seconds: 2), () {
+        Navigator.pushReplacementNamed(context, "title");
+      });
     });
   }
 
@@ -70,6 +136,11 @@ class _GamePageState extends State<GamePage> {
         _gameMessage = "Blackjack! You win.";
         isPlayerTurn = false;
         player.funds+=(curHand.bet * 3/2);
+        // Add delay before next game
+        isTransitioning = true;
+        Future.delayed(const Duration(seconds: 2), () {
+          _startNewGame();
+        });
       }
     });
   }
@@ -77,6 +148,9 @@ class _GamePageState extends State<GamePage> {
   void _bet(double amount){
     setState(() {
       player.bet(curHand, amount);
+      hasBet = true;
+      _gameMessage = "Game in progress";
+      _firstDeal();
     });
   }
 
@@ -92,9 +166,14 @@ class _GamePageState extends State<GamePage> {
           _gameMessage = "Dealer wins! $dealerScore vs $playerScore";
         }
         else {
-          _gameMessage = "It's a tie! $playerScore vs $dealerScore";
+          _gameMessage = "It's a tie! $playerScore vs $playerScore";
           player.funds+=curHand.bet;
         }
+      // Add delay before next game
+      isTransitioning = true;
+      Future.delayed(const Duration(seconds: 2), () {
+        _startNewGame();
+      });
     });
   }
 
@@ -106,6 +185,11 @@ class _GamePageState extends State<GamePage> {
       if (playerScore > 21) {
         _gameMessage = "You busted with $playerScore! Dealer wins.";
         nextHand();
+        // Add delay before next game
+        isTransitioning = true;
+        Future.delayed(const Duration(seconds: 2), () {
+          _startNewGame();
+        });
       }
     });
   }
@@ -123,6 +207,11 @@ class _GamePageState extends State<GamePage> {
   void _surrender(){
     // Discard bet and hand
     nextHand();
+    // Add delay before next game
+    isTransitioning = true;
+    Future.delayed(const Duration(seconds: 2), () {
+      _startNewGame();
+    });
   }
 
   void _doubleDown(){
@@ -146,7 +235,6 @@ class _GamePageState extends State<GamePage> {
     });
   }
 
-  // Check this with new card class value parameter
   void _split() {
     setState(() {
       int handLength = curHand.hand.length;
@@ -212,11 +300,23 @@ class _GamePageState extends State<GamePage> {
                           ),
                           textAlign: TextAlign.center,
                         ),
+                        if (isTransitioning) Padding(
+                          padding: const EdgeInsets.only(top: 8.0),
+                          child: Text(
+                            "Loading next game...",
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.white,
+                              fontFamily: 'Minecraft',
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                     Column(
                       children: [
-                        Wrap(
+                        if (!hasBet) Wrap(
                           alignment: WrapAlignment.center,
                           spacing: 8,
                           runSpacing: 8,
@@ -237,7 +337,7 @@ class _GamePageState extends State<GamePage> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
-                              Text(
+                              if (hasBet) Text(
                                 "Sum: ${curHand.sum}",
                                 style: TextStyle(
                                   fontSize: 16,
@@ -270,7 +370,7 @@ class _GamePageState extends State<GamePage> {
                 ),
               ),
             ),
-            Container(
+            if ((hasBet && !isTransitioning) || (!hasBet && !isTransitioning)) Container(
               padding: EdgeInsets.all(8.0),
               decoration: BoxDecoration(
                 color: Color.fromRGBO(33, 126, 75, 1),
@@ -288,61 +388,63 @@ class _GamePageState extends State<GamePage> {
                 runSpacing: 8,
                 alignment: WrapAlignment.center,
                 children: [
-                  ElevatedButton(
-                    onPressed: (isPlayerTurn && curHand.bet>0) ? _hit : null,
+                  if (hasBet && !isTransitioning) ...[
+                    ElevatedButton(
+                      onPressed: (isPlayerTurn && curHand.bet>0) ? _hit : null,
+                      style: ElevatedButton.styleFrom(
+                        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        textStyle: TextStyle(fontSize: 14, fontFamily: 'Minecraft'),
+                      ),
+                      child: const Text("Hit"),
+                    ),
+                    ElevatedButton(
+                      onPressed: (isPlayerTurn && curHand.bet>0) ? _stand : null,
+                      style: ElevatedButton.styleFrom(
+                        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        textStyle: TextStyle(fontSize: 14, fontFamily: 'Minecraft'),
+                      ),
+                      child: const Text("Stand"),
+                    ),
+                    ElevatedButton(
+                      onPressed: (isPlayerTurn && curHand.bet>0) ? _surrender : null,
+                      style: ElevatedButton.styleFrom(
+                        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        textStyle: TextStyle(fontSize: 14, fontFamily: 'Minecraft'),
+                      ),
+                      child: const Text("Surrender"),
+                    ),
+                    ElevatedButton(
+                      onPressed: (isPlayerTurn && curHand.bet>0) ? _doubleDown : null,
+                      style: ElevatedButton.styleFrom(
+                        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        textStyle: TextStyle(fontSize: 14, fontFamily: 'Minecraft'),
+                      ),
+                      child: const Text("Double Down"),
+                    ),
+                    ElevatedButton(
+                      onPressed: (isPlayerTurn && curHand.bet>0) ? _insurance : null,
+                      style: ElevatedButton.styleFrom(
+                        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        textStyle: TextStyle(fontSize: 14, fontFamily: 'Minecraft'),
+                      ),
+                      child: const Text("Insurance"),
+                    ),
+                    ElevatedButton(
+                      onPressed: (isPlayerTurn && curHand.bet>0) ? _split : null,
+                      style: ElevatedButton.styleFrom(
+                        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        textStyle: TextStyle(fontSize: 14, fontFamily: 'Minecraft'),
+                      ),
+                      child: const Text("Split"),
+                    ),
+                  ],
+                  if (!isTransitioning) ElevatedButton(
+                    onPressed: _showLeaveConfirmation,
                     style: ElevatedButton.styleFrom(
                       padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                       textStyle: TextStyle(fontSize: 14, fontFamily: 'Minecraft'),
                     ),
-                    child: const Text("Hit"),
-                  ),
-                  ElevatedButton(
-                    onPressed: (isPlayerTurn && curHand.bet>0) ? _stand : null,
-                    style: ElevatedButton.styleFrom(
-                      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      textStyle: TextStyle(fontSize: 14, fontFamily: 'Minecraft'),
-                    ),
-                    child: const Text("Stand"),
-                  ),
-                  ElevatedButton(
-                    onPressed: (isPlayerTurn && curHand.bet>0) ? _surrender : null,
-                    style: ElevatedButton.styleFrom(
-                      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      textStyle: TextStyle(fontSize: 14, fontFamily: 'Minecraft'),
-                    ),
-                    child: const Text("Surrender"),
-                  ),
-                  ElevatedButton(
-                    onPressed: (isPlayerTurn && curHand.bet>0) ? _doubleDown : null,
-                    style: ElevatedButton.styleFrom(
-                      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      textStyle: TextStyle(fontSize: 14, fontFamily: 'Minecraft'),
-                    ),
-                    child: const Text("Double Down"),
-                  ),
-                  ElevatedButton(
-                    onPressed: (isPlayerTurn && curHand.bet>0) ? _insurance : null,
-                    style: ElevatedButton.styleFrom(
-                      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      textStyle: TextStyle(fontSize: 14, fontFamily: 'Minecraft'),
-                    ),
-                    child: const Text("Insurance"),
-                  ),
-                  ElevatedButton(
-                    onPressed: (isPlayerTurn && curHand.bet>0) ? _split : null,
-                    style: ElevatedButton.styleFrom(
-                      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      textStyle: TextStyle(fontSize: 14, fontFamily: 'Minecraft'),
-                    ),
-                    child: const Text("Split"),
-                  ),
-                  ElevatedButton(
-                    onPressed: _startNewGame,
-                    style: ElevatedButton.styleFrom(
-                      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      textStyle: TextStyle(fontSize: 14, fontFamily: 'Minecraft'),
-                    ),
-                    child: const Text("New Game"),
+                    child: const Text("Leave Game"),
                   ),
                 ],
               ),
