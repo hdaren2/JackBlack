@@ -1,5 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:jackblack/hand.dart';
+import 'package:jackblack/shoe.dart';
 import 'player.dart';
 
 void main() {
