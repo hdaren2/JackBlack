@@ -20,6 +20,7 @@ class _GamePageState extends State<GamePage> {
   bool hasBet = false;
   bool isGameEnding = false;
   bool isTransitioning = false;
+  bool showDealerCard = false;
 
   String _gameMessage = "Welcome to Jack Black Blackjack!";
 
@@ -31,7 +32,18 @@ class _GamePageState extends State<GamePage> {
         curHandIndex++;
       } else {
         isPlayerTurn = false;
+        _dealerPlay();
       }
+    });
+  }
+
+  void _dealerPlay() {
+    setState(() {
+      showDealerCard = true;
+      while (dealer.sum < 17) {
+        dealer.add(shoe.deal());
+      }
+      _checkBust();
     });
   }
 
@@ -51,6 +63,7 @@ class _GamePageState extends State<GamePage> {
       hasBet = false;
       isGameEnding = false;
       isTransitioning = false;
+      showDealerCard = false;
       _gameMessage = "Welcome! Please make a bet to start";   
     });
   }
@@ -139,7 +152,9 @@ class _GamePageState extends State<GamePage> {
         // Add delay before next game
         isTransitioning = true;
         Future.delayed(const Duration(seconds: 2), () {
-          _startNewGame();
+          setState(() {
+            _startNewGame();
+          });
         });
       }
     });
@@ -158,21 +173,30 @@ class _GamePageState extends State<GamePage> {
     setState(() {
       int playerScore = curHand.sum;
       int dealerScore = dealer.sum;
-      if (dealerScore > 21 || playerScore > dealerScore) {
-          _gameMessage = "You win! $playerScore vs $dealerScore";
-          player.funds+=2*curHand.bet;
-        }
-        else if (playerScore < dealerScore) {
-          _gameMessage = "Dealer wins! $dealerScore vs $playerScore";
-        }
-        else {
-          _gameMessage = "It's a tie! $playerScore vs $playerScore";
-          player.funds+=curHand.bet;
-        }
+      
+      if (playerScore > 21 && dealerScore > 21) {
+        _gameMessage = "You both bust! $playerScore vs $dealerScore";
+      } else if (playerScore > 21) {
+        _gameMessage = "You busted with $playerScore! Dealer wins.";
+      } else if (dealerScore > 21) {
+        _gameMessage = "Dealer busted with $dealerScore! You win!";
+        player.funds += 2 * curHand.bet;
+      } else if (playerScore > dealerScore) {
+        _gameMessage = "You win! $playerScore vs $dealerScore";
+        player.funds += 2 * curHand.bet;
+      } else if (playerScore < dealerScore) {
+        _gameMessage = "Dealer wins! $dealerScore vs $playerScore";
+      } else {
+        _gameMessage = "It's a tie! $playerScore vs $playerScore";
+        player.funds += curHand.bet;
+      }
+      
       // Add delay before next game
       isTransitioning = true;
       Future.delayed(const Duration(seconds: 2), () {
-        _startNewGame();
+        setState(() {
+          _startNewGame();
+        });
       });
     });
   }
@@ -185,33 +209,17 @@ class _GamePageState extends State<GamePage> {
       if (playerScore > 21) {
         _gameMessage = "You busted with $playerScore! Dealer wins.";
         nextHand();
-        // Add delay before next game
-        isTransitioning = true;
-        Future.delayed(const Duration(seconds: 2), () {
-          _startNewGame();
-        });
       }
     });
   }
 
   void _stand() {
-    setState(() {
-      while (dealer.sum < 17) {
-        dealer.add(shoe.deal());
-      }
-      _checkBust();
-      nextHand();
-    });
+    nextHand();
   }
 
   void _surrender(){
     // Discard bet and hand
     nextHand();
-    // Add delay before next game
-    isTransitioning = true;
-    Future.delayed(const Duration(seconds: 2), () {
-      _startNewGame();
-    });
   }
 
   void _doubleDown(){
@@ -276,8 +284,33 @@ class _GamePageState extends State<GamePage> {
                         ),
                         Wrap(
                           spacing: 8,
-                          children: (curHand.bet>0) ? dealer.hand.map((card) => PlayingCardWidget(card: card)).toList() : [],
+                          children: (curHand.bet>0) ? [
+                            if (dealer.hand.isNotEmpty) SizedBox(
+                              width: dealer.hand.length >= 4 ? 85 : 120,
+                              child: PlayingCardWidget(card: dealer.hand[0]),
+                            ),
+                            if (dealer.hand.length > 1) SizedBox(
+                              width: dealer.hand.length >= 4 ? 85 : 120,
+                              child: showDealerCard 
+                                ? PlayingCardWidget(card: dealer.hand[1])
+                                : SizedBox(
+                                    width: dealer.hand.length >= 4 ? 85 : 120,
+                                    height: 182,
+                                    child: Image.asset(
+                                      'assets/cards/CARDBACK.png',
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                            ),
+                            ...dealer.hand.skip(2).map((card) => 
+                              SizedBox(
+                                width: dealer.hand.length >= 4 ? 85 : 120,
+                                child: PlayingCardWidget(card: card),
+                              )
+                            ).toList(),
+                          ] : [],
                         ),
+                        SizedBox(height: 30),
                         Text(
                           "Player",
                           style: TextStyle(
@@ -289,7 +322,12 @@ class _GamePageState extends State<GamePage> {
                         ),
                         Wrap(
                           spacing: 8,
-                          children: (curHand.bet>0) ? curHand.hand.map((card) => PlayingCardWidget(card: card)).toList() : [],
+                          children: (curHand.bet>0) ? curHand.hand.map((card) => 
+                            SizedBox(
+                              width: curHand.hand.length >= 4 ? 85 : 120,
+                              child: PlayingCardWidget(card: card),
+                            )
+                          ).toList() : [],
                         ),
                         Text(
                           _gameMessage,
@@ -300,7 +338,7 @@ class _GamePageState extends State<GamePage> {
                           ),
                           textAlign: TextAlign.center,
                         ),
-                        if (isTransitioning) Padding(
+                        if (isTransitioning && !isGameEnding) Padding(
                           padding: const EdgeInsets.only(top: 8.0),
                           child: Text(
                             "Loading next game...",
