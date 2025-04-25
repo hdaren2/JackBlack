@@ -26,7 +26,7 @@ class MyApp extends StatelessWidget {
       routes: {
         "title": (context) => const TitlePage(),
         "mode": (context) => const ModePage(),
-      }
+      },
     );
   }
 }
