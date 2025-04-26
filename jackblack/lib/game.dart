@@ -388,7 +388,7 @@ class _GamePageState extends State<GamePage> {
                 }
               )
             ],
-          )
+          ),
           SizedBox(height: 20),
           CustomButton(
             text: "Quit",
@@ -420,6 +420,7 @@ class _GamePageState extends State<GamePage> {
             children: [
               CustomButton(
                 text: "No",
+                width: 78,
                 onPressed: () {
                   setState(() {
                     showQuitPrompt = false;
@@ -442,7 +443,15 @@ class _GamePageState extends State<GamePage> {
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(_gameResult),
+          Text(_gameResult,
+            style: TextStyle(
+              fontSize: 19,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+              fontFamily: 'Minecraft',
+              shadows: [Shadow(offset: Offset(3, 2.7), blurRadius: 0, color: Color.fromRGBO(63, 63, 63, 1))]
+            ),
+          ),
           SizedBox(height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
