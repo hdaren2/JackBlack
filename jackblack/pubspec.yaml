@@ -59,7 +59,7 @@ flutter:
   assets:
     - assets/
     - assets/cards/
-    - assets/Blackjacklogo.jpeg
+    # - assets/Blackjacklogo.jpeg
     - assets/jackblacklogo2.png
     - assets/pokerchips.png
 

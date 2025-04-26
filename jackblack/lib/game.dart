@@ -350,7 +350,15 @@ class _GamePageState extends State<GamePage> {
             ),
           ),
           SizedBox(height: 10),
-          Text("Sum: ${curHand.sum}"),
+          Text("Sum: ${curHand.sum}",
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+              fontFamily: 'Minecraft',
+              shadows: [Shadow(offset: Offset(2.4, 2.4), blurRadius: 0, color: Color.fromRGBO(63, 63, 63, 1))]
+            ),
+          ),
         ],
       ),
     );
