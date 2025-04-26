@@ -17,6 +17,31 @@ class FirstRoute extends StatelessWidget {
               painter: BlackjackTablePainter(),
             ),
           ),
+          // Add poker chips image at the top
+          Positioned(
+            top: MediaQuery.of(context).size.height * -0.05,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Image.asset(
+                    'assets/pokerchips.png',
+                    width: MediaQuery.of(context).size.width * 0.7,
+                    height: MediaQuery.of(context).size.width * 0.7,
+                    fit: BoxFit.contain,
+                  ),
+                  Image.asset(
+                    'assets/logo.png',
+                    width: MediaQuery.of(context).size.width * 0.5,
+                    height: MediaQuery.of(context).size.width * 0.5,
+                    fit: BoxFit.contain,
+                  ),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -24,155 +49,107 @@ class FirstRoute extends StatelessWidget {
 }
 
 class BlackjackTablePainter extends CustomPainter {
+  List<Map<String, dynamic>> _getPlayerPositions(Size size) {
+    return [
+      {'pos': Offset(size.width * 0.2, size.height * 0.6), 'label': 'PLAYER 1'},
+      {'pos': Offset(size.width * 0.4, size.height * 0.65), 'label': 'PLAYER 2'},
+      {'pos': Offset(size.width * 0.6, size.height * 0.65), 'label': 'PLAYER 3'},
+      {'pos': Offset(size.width * 0.8, size.height * 0.6), 'label': 'PLAYER 4'},
+    ];
+  }
+
+  void _drawPlayerPositions(Canvas canvas, Size size, Paint cardAreaPaint, List<Map<String, dynamic>> playerPositions) {
+    for (var player in playerPositions) {
+      var position = player['pos'] as Offset;
+      canvas.drawRect(
+        Rect.fromCenter(
+          center: Offset(position.dx, position.dy - size.height * 0.08),
+          width: size.width * 0.1,
+          height: size.height * 0.1,
+        ),
+        cardAreaPaint,
+      );
+    }
+  }
+
+  void _drawPlayerLabels(Canvas canvas, List<Map<String, dynamic>> playerPositions) {
+    for (var player in playerPositions) {
+      var position = player['pos'] as Offset;
+      final labelPainter = TextPainter(
+        text: TextSpan(
+          text: player['label'] as String,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 16,
+            fontFamily: 'Minecraft',
+          ),
+        ),
+        textDirection: TextDirection.ltr,
+      );
+
+      labelPainter.layout();
+      labelPainter.paint(
+        canvas,
+        Offset(position.dx - 30, position.dy - 100),
+      );
+    }
+  }
+
   @override
   void paint(Canvas canvas, Size size) {
     // Create the main table color (dark green felt)
     final tablePaint = Paint()
-      ..color = const Color(0xFF58181F)
+      ..color = const Color(0xFF0F5132)
       ..style = PaintingStyle.fill;
 
-    // Draw the main table
+    // Draw the main table as a rectangle
     canvas.drawRect(
       Rect.fromLTWH(0, 0, size.width, size.height),
       tablePaint,
     );
 
-    // Draw the table border
+    // Draw the wooden border
     final borderPaint = Paint()
-      ..color = Colors.brown[800]!
+      ..color = const Color(0xFF8B4513)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 20.0;
+      ..strokeWidth = size.width * 0.03;
 
-    canvas.drawRect(
-      Rect.fromLTWH(10, 10, size.width - 20, size.height - 20),
-      borderPaint,
-    );
-
-    // Draw some decorative elements
-    final decorationPaint = Paint()
-      ..color = Colors.black
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.0;
-
-    // Draw some curved lines for decoration
+    // Draw semi-circular table edge at the bottom
     final path = Path()
-      ..moveTo(size.width * 0.2, size.height * 0.3)
-      ..quadraticBezierTo(
-        size.width * 0.5,
-        size.height * 0.2,
-        size.width * 0.8,
-        size.height * 0.3,
-      );
+      ..moveTo(0, 0)
+      ..lineTo(0, size.height * 0.7)
+      ..arcToPoint(
+        Offset(size.width, size.height * 0.7),
+        radius: Radius.circular(size.width * 0.8),
+        clockwise: false,
+      )
+      ..lineTo(size.width, 0)
+      ..close();
 
-    canvas.drawPath(path, decorationPaint);
+    canvas.drawPath(path, borderPaint);
 
-    // Draw player position rectangles
-    final playerPaint = Paint()
-      ..color = Colors.black
+    // Draw card placement areas with slight transparency
+    final cardAreaPaint = Paint()
+      ..color = Colors.white.withOpacity(0.1)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 3.0;
+      ..strokeWidth = 2;
 
-    // Number of player positions
-    const int numPositions = 7;
-    final double rectWidth = size.width * 0.08;
-    final double rectHeight = size.height * 0.25;
-    final double spacing = size.width * 0.02;
-
-    // Calculate the curve parameters
-    final double startX = size.width * 0.1;
-    final double endX = size.width * 0.9;
-    final double controlY = size.height * 0.7;
-    final double bottomY = size.height * 0.85;
-
-    for (int i = 0; i < numPositions; i++) {
-      // Calculate position along the curve
-      final double t = i / (numPositions - 1);
-      final double x = startX + (endX - startX) * t;
-      final double y = bottomY - (bottomY - controlY) * (1 - (2 * t - 1) * (2 * t - 1));
-
-      // Draw rounded rectangle
-      final rect = RRect.fromRectAndRadius(
-        Rect.fromLTWH(
-          x - rectWidth / 2,
-          y - rectHeight / 2,
-          rectWidth,
-          rectHeight,
-        ),
-        const Radius.circular(15),
-      );
-
-      canvas.drawRRect(rect, playerPaint);
-    }
-
-    // Draw curved "JACKBLACK" text
-    final textPaint = Paint()
-      ..color = Colors.black
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.0;
-
-    const String text = "JACKBLACK";
-    final double textSize = size.width * 0.08;
-    final double textY = size.height * 0.25;
-
-    // Create a path for the curved text
-    final textPath = Path();
-    textPath.moveTo(size.width * 0.2, textY);
-    textPath.quadraticBezierTo(
-      size.width * 0.5,
-      textY - size.height * 0.1,
-      size.width * 0.8,
-      textY,
-    );
-
-    // Draw the text along the path
-    final textStyle = TextStyle(
-      color: Colors.black,
-      fontSize: textSize,
-      fontWeight: FontWeight.bold,
-    );
-
-    final textPainter = TextPainter(
-      text: TextSpan(
-        text: text,
-        style: textStyle,
+    // Dealer's card area at the top
+    canvas.drawRect(
+      Rect.fromCenter(
+        center: Offset(size.width * 0.5, size.height * 0.3),
+        width: size.width * 0.12,
+        height: size.height * 0.12,
       ),
-      textDirection: TextDirection.ltr,
+      cardAreaPaint,
     );
 
-    textPainter.layout();
+    // Get player positions
+    final playerPositions = _getPlayerPositions(size);
 
-    // Calculate the path metrics
-    final pathMetrics = textPath.computeMetrics().first;
-    final pathLength = pathMetrics.length;
-    final textWidth = textPainter.width;
-    final startOffset = (pathLength - textWidth) / 2;
-
-    // Draw the text along the path
-    for (int i = 0; i < text.length; i++) {
-      final double charWidth = textPainter.width / text.length;
-      final double charOffset = startOffset + (i * charWidth);
-      
-      final tangent = pathMetrics.getTangentForOffset(charOffset);
-      if (tangent != null) {
-        canvas.save();
-        canvas.translate(tangent.position.dx, tangent.position.dy);
-        canvas.rotate(tangent.angle);
-        
-        final charSpan = TextSpan(
-          text: text[i],
-          style: textStyle,
-        );
-        
-        final charPainter = TextPainter(
-          text: charSpan,
-          textDirection: TextDirection.ltr,
-        );
-        
-        charPainter.layout();
-        charPainter.paint(canvas, Offset(-charWidth / 2, -textSize / 2));
-        canvas.restore();
-      }
-    }
+    // Draw player positions and labels
+    _drawPlayerPositions(canvas, size, cardAreaPaint, playerPositions);
+    _drawPlayerLabels(canvas, playerPositions);
   }
 
   @override
