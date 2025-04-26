@@ -22,6 +22,8 @@ class StatPageState extends State<StatPage>{
         Text("Biggest win: "),
         Text("Biggest bet: "),
         Text("Games played: "),
+        Text("Games won: "),
+        Text("Games lost: "),
       ],)
     );
   }
