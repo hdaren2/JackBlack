@@ -281,7 +281,15 @@ class _GamePageState extends State<GamePage> {
                 ),
                 ),
                 SizedBox(width: 20),
-                Text("Bet: \$$bet")
+                Text("Bet: \$$bet",
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  fontFamily: 'Minecraft',
+                  shadows: [Shadow(offset: Offset(2.9,3.1), blurRadius: 0, color: Color.fromRGBO(63,63,63,1))]
+                ),
+                ),
               ],
             ),
           ],
