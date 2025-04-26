@@ -365,7 +365,7 @@ class _GamePageState extends State<GamePage> {
   }
 
   Widget _buildButtonSection() {
-    if (showBetPrompt) {
+    if (showBetPrompt && !showQuitPrompt) {
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -389,6 +389,15 @@ class _GamePageState extends State<GamePage> {
               )
             ],
           )
+          SizedBox(height: 20),
+          CustomButton(
+            text: "Quit",
+            onPressed: () {
+              setState(() {
+                showQuitPrompt = true;
+              });
+            }
+          ),
         ],
       );
     }
@@ -396,7 +405,15 @@ class _GamePageState extends State<GamePage> {
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text("Leave game?"),
+          Text("Leave game?",
+            style: TextStyle(
+              fontSize: 28,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+              fontFamily: 'Minecraft',
+              shadows: [Shadow(offset: Offset(2.4, 2.4), blurRadius: 0, color: Color.fromRGBO(63, 63, 63, 1))]
+            ),
+          ),
           SizedBox(height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
