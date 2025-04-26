@@ -563,8 +563,24 @@ class _GamePageState extends State<GamePage> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text("Funds: ${player.funds}"),
-              Text("Bet: ${curHand.bet}")
+              Text("Funds: \$${player.funds}",
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  fontFamily: 'Minecraft',
+                  shadows: [Shadow(offset: Offset(2.4, 2.4), blurRadius: 0, color: Color.fromRGBO(63, 63, 63, 1))]
+                ),
+              ),
+              Text("Bet: \$${curHand.bet}",
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  fontFamily: 'Minecraft',
+                  shadows: [Shadow(offset: Offset(2.4, 2.4), blurRadius: 0, color: Color.fromRGBO(63, 63, 63, 1))]
+                ),
+              ),
             ],
           ),
         ),
