@@ -3,6 +3,7 @@ import 'package:jackblack/card.dart';
 import 'package:jackblack/shoe.dart';
 import 'package:jackblack/hand.dart';
 import 'package:jackblack/player.dart';
+import 'package:jackblack/widgets/custom_button.dart';
 
 class GamePage extends StatefulWidget {
   const GamePage({super.key});
@@ -17,12 +18,13 @@ class _GamePageState extends State<GamePage> {
   final DealerHand dealer = DealerHand();
   bool isPlayerTurn = true;
   int curHandIndex = 0;
-  bool hasBet = false;
-  bool isGameEnding = false;
-  bool isTransitioning = false;
-  bool showDealerCard = false;
-
-  String _gameMessage = "Welcome to Jack Black Blackjack!";
+  bool showBetPrompt = true;
+  bool showQuitPrompt = false;
+  String _gameResult = "";
+  double bet = 0;
+  double funds = 1000;
+  String betMessage = "";
+  bool roundOver = false;
 
   Hand get curHand => player.hands[curHandIndex];
 
@@ -39,94 +41,26 @@ class _GamePageState extends State<GamePage> {
 
   void _dealerPlay() {
     setState(() {
-      showDealerCard = true;
       while (dealer.sum < 17) {
         dealer.add(shoe.deal());
       }
-      _checkBust();
+      _checkResult();
     });
   }
 
-  double bet(Player p, Hand h, double amount) {
-    p.funds -= amount;
-    return amount;
-  }
-
-  void _startNewGame() {
+  void _startGame() {
     setState(() {
       // Reset everything
       player.hands.clear();
-      dealer.clear();
-      player.addEmptyHand();
       curHandIndex = 0;
       isPlayerTurn = true;
-      hasBet = false;
-      isGameEnding = false;
-      isTransitioning = false;
-      showDealerCard = false;
-      _gameMessage = "Welcome! Please make a bet to start";
-    });
-  }
-
-  void _showLeaveConfirmation() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(
-            'Leave Game?',
-            style: TextStyle(fontFamily: 'Minecraft', color: Colors.red),
-          ),
-          content: Text(
-            'Are you sure you want to leave the game and forfeit the current round?',
-            style: TextStyle(fontFamily: 'Minecraft'),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Close dialog
-              },
-              child: Text(
-                'No',
-                style: TextStyle(fontFamily: 'Minecraft', color: Colors.red),
-              ),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Close dialog
-                _endGame();
-              },
-              child: Text(
-                'Yes',
-                style: TextStyle(fontFamily: 'Minecraft', color: Colors.green),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _endGame() {
-    setState(() {
-      isGameEnding = true;
-      isTransitioning = true;
-      _gameMessage = "Game ended. Returning to main menu...";
-      // Add a delay before returning to main menu
-      Future.delayed(const Duration(seconds: 2), () {
-        Navigator.pushReplacementNamed(context, "title");
-      });
-    });
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _startNewGame();
-  }
-
-  void _firstDeal() {
-    setState(() {
+      roundOver = false;
+      dealer.clear();
+      _gameResult = "";
+      // Add a new empty hand to start with
+      player.addEmptyHand();
+      curHand.bet = bet;
+      bet = 0;
       // Deal two cards to player
       curHand.add(shoe.deal());
       curHand.add(shoe.deal());
@@ -135,77 +69,51 @@ class _GamePageState extends State<GamePage> {
       dealer.add(shoe.deal());
       // Check for immediate blackjack
       if (curHand.sum == 21) {
-        _gameMessage = "Blackjack! You win.";
-        isPlayerTurn = false;
+        _gameResult = "Blackjack! You win.";
         player.funds += (curHand.bet * 3 / 2);
-        // Add delay before next game
-        isTransitioning = true;
-        Future.delayed(const Duration(seconds: 2), () {
-          setState(() {
-            _startNewGame();
-          });
-        });
+        isPlayerTurn = false;
+        roundOver = true;
       }
     });
   }
 
-  void _bet(double amount) {
-    setState(() {
-      if (player.funds >= amount) {
-        player.bet(curHand, amount);
-        _gameMessage = "Game in progress";
-      } else {
-        _gameMessage = "You don't have enough funds for that bet!";
-      }
-    });
+  @override
+  void initState() {
+    super.initState();
+    _startGame();
   }
 
-  void _placeBet() {
-    setState(() {
-      hasBet = true;
-      _firstDeal();
-    });
-  }
-
-  void _checkBust() {
+  void _checkResult() {
     setState(() {
       int playerScore = curHand.sum;
       int dealerScore = dealer.sum;
 
       if (playerScore > 21 && dealerScore > 21) {
-        _gameMessage = "You both bust! $playerScore vs $dealerScore";
+        _gameResult = "You both bust! $playerScore vs $dealerScore";
       } else if (playerScore > 21) {
-        _gameMessage = "You busted with $playerScore! Dealer wins.";
+        _gameResult = "You busted with $playerScore! Dealer wins.";
       } else if (dealerScore > 21) {
-        _gameMessage = "Dealer busted with $dealerScore! You win!";
+        _gameResult = "Dealer busted with $dealerScore! You win!";
         player.funds += 2 * curHand.bet;
       } else if (playerScore > dealerScore) {
-        _gameMessage = "You win! $playerScore vs $dealerScore";
+        _gameResult = "You win! $playerScore vs $dealerScore";
         player.funds += 2 * curHand.bet;
       } else if (playerScore < dealerScore) {
-        _gameMessage = "Dealer wins! $dealerScore vs $playerScore";
+        _gameResult = "Dealer wins! $dealerScore vs $playerScore";
       } else {
-        _gameMessage = "It's a tie! $playerScore vs $playerScore";
+        _gameResult = "It's a tie! $playerScore vs $playerScore";
         player.funds += curHand.bet;
       }
-
-      // Add delay before next game
-      isTransitioning = true;
-      Future.delayed(const Duration(seconds: 2), () {
-        setState(() {
-          _startNewGame();
-        });
-      });
+      roundOver = true;
     });
   }
 
   void _hit() {
     setState(() {
       player.hit(curHand, shoe);
-
       int playerScore = curHand.sum;
       if (playerScore > 21) {
-        _gameMessage = "You busted with $playerScore! Dealer wins.";
+        _gameResult = "You busted with $playerScore! Dealer wins.";
         nextHand();
       }
     });
@@ -220,6 +128,7 @@ class _GamePageState extends State<GamePage> {
     nextHand();
   }
 
+  // Fix functionality
   void _doubleDown() {
     setState(() {
       if (curHand.sum <= 11) player.doubleDown(curHand);
@@ -248,8 +157,49 @@ class _GamePageState extends State<GamePage> {
         int c2 = curHand.hand[1].value;
         if (c1 == c2) {
           player.split(curHand);
-          _gameMessage = "You split the hand, play your first hand first";
+          //_gameMessage = "You split the hand, play your first hand first";
         }
+      }
+    });
+  }
+
+  void _addToBet(double amount) {
+    setState(() {
+      bet += amount;
+      funds -= bet;
+    });
+  }
+
+  void _resetBet() {
+    setState(() {
+      bet = 0;
+      betMessage = "";
+    });
+  }
+
+  void _confirmBet() {
+    setState(() {
+      if (bet == 0) {
+        betMessage = "Bet must be more than 0.";
+        Future.delayed(const Duration(seconds: 2), () {
+          setState(() {
+            betMessage = "";
+          });
+        });
+      }
+      else if (bet > player.funds) {
+        betMessage = "Insufficient funds.";
+        Future.delayed(const Duration(seconds: 2), () {
+          setState(() {
+            betMessage = "";
+          });
+        });
+      }
+      else {
+        player.bet(curHand, bet);
+        betMessage = "";
+        showBetPrompt = false;
+        _startGame();
       }
     });
   }
@@ -258,338 +208,303 @@ class _GamePageState extends State<GamePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color.fromRGBO(33, 126, 75, 1),
-      body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16.0,
-                  vertical: 8.0,
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      children: [
-                        Image.asset('assets/logo.PNG', scale: 2.5),
-                        Text(
-                          "Dealer",
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                            fontFamily: 'Minecraft',
-                          ),
-                        ),
-                        Wrap(
-                          spacing: 8,
-                          children:
-                              (curHand.bet > 0)
-                                  ? [
-                                    if (dealer.hand.isNotEmpty)
-                                      SizedBox(
-                                        width:
-                                            dealer.hand.length >= 4 ? 85 : 120,
-                                        child: PlayingCardWidget(
-                                          card: dealer.hand[0],
-                                        ),
-                                      ),
-                                    if (dealer.hand.length > 1)
-                                      SizedBox(
-                                        width:
-                                            dealer.hand.length >= 4 ? 85 : 120,
-                                        child:
-                                            showDealerCard
-                                                ? PlayingCardWidget(
-                                                  card: dealer.hand[1],
-                                                )
-                                                : SizedBox(
-                                                  width:
-                                                      dealer.hand.length >= 4
-                                                          ? 85
-                                                          : 120,
-                                                  height: 182,
-                                                  child: Image.asset(
-                                                    'assets/cards/CARDBACK.png',
-                                                    fit: BoxFit.cover,
-                                                  ),
-                                                ),
-                                      ),
-                                    ...dealer.hand
-                                        .skip(2)
-                                        .map(
-                                          (card) => SizedBox(
-                                            width:
-                                                dealer.hand.length >= 4
-                                                    ? 85
-                                                    : 120,
-                                            child: PlayingCardWidget(
-                                              card: card,
-                                            ),
-                                          ),
-                                        )
-                                        .toList(),
-                                  ]
-                                  : [],
-                        ),
-                        SizedBox(height: 30),
-                        Text(
-                          "Player",
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                            fontFamily: 'Minecraft',
-                          ),
-                        ),
-                        Wrap(
-                          spacing: 8,
-                          children:
-                              (curHand.bet > 0)
-                                  ? curHand.hand
-                                      .map(
-                                        (card) => SizedBox(
-                                          width:
-                                              curHand.hand.length >= 4
-                                                  ? 85
-                                                  : 120,
-                                          child: PlayingCardWidget(card: card),
-                                        ),
-                                      )
-                                      .toList()
-                                  : [],
-                        ),
-                        Text(
-                          _gameMessage,
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.white,
-                            fontFamily: 'Minecraft',
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        if (isTransitioning && !isGameEnding)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 8.0),
-                            child: Text(
-                              "Loading next game...",
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.white,
-                                fontFamily: 'Minecraft',
-                                fontStyle: FontStyle.italic,
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                    Column(
-                      children: [
-                        if (!hasBet)
-                          Wrap(
-                            alignment: WrapAlignment.center,
-                            spacing: 8,
-                            runSpacing: 8,
-                            children: [
-                              for (var value in [1, 5, 10, 25, 50, 100])
-                                ElevatedButton(
-                                  onPressed: () => _bet(value.toDouble()),
-                                  style: ElevatedButton.styleFrom(
-                                    padding: EdgeInsets.symmetric(
-                                      horizontal: 12,
-                                      vertical: 8,
-                                    ),
-                                    textStyle: TextStyle(
-                                      fontSize: 14,
-                                      fontFamily: 'Minecraft',
-                                    ),
-                                  ),
-                                  child: Text("\$$value"),
-                                ),
-                              ElevatedButton(
-                                onPressed: _placeBet,
-                                child: const Text("Place Bet"),
-                              ),
-                            ],
-                          ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              if (hasBet)
-                                Text(
-                                  "Sum: ${curHand.sum}",
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.white,
-                                    fontFamily: 'Minecraft',
-                                  ),
-                                ),
-                              Text(
-                                "Bet: ${curHand.bet}",
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.white,
-                                  fontFamily: 'Minecraft',
-                                ),
-                              ),
-                              Text(
-                                "Funds: ${player.funds}",
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.white,
-                                  fontFamily: 'Minecraft',
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+      body: Center(
+        child: Container(
+          child: Column(
+            children: [
+              SizedBox(
+                height: MediaQuery.of(context).size.height * 0.07,
+                child: _buildStatsSection(),
               ),
-            ),
-            if ((hasBet && !isTransitioning) || (!hasBet && !isTransitioning))
-              Container(
-                padding: EdgeInsets.all(8.0),
-                decoration: BoxDecoration(
-                  color: Color.fromRGBO(33, 126, 75, 1),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
-                      spreadRadius: 1,
-                      blurRadius: 3,
-                      offset: Offset(0, -1),
-                    ),
-                  ],
-                ),
-                child: Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  alignment: WrapAlignment.center,
-                  children: [
-                    if (hasBet && !isTransitioning) ...[
-                      ElevatedButton(
-                        onPressed:
-                            (isPlayerTurn && curHand.bet > 0) ? _hit : null,
-                        style: ElevatedButton.styleFrom(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
-                          ),
-                          textStyle: TextStyle(
-                            fontSize: 14,
-                            fontFamily: 'Minecraft',
-                          ),
-                        ),
-                        child: const Text("Hit"),
-                      ),
-                      ElevatedButton(
-                        onPressed:
-                            (isPlayerTurn && curHand.bet > 0) ? _stand : null,
-                        style: ElevatedButton.styleFrom(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
-                          ),
-                          textStyle: TextStyle(
-                            fontSize: 14,
-                            fontFamily: 'Minecraft',
-                          ),
-                        ),
-                        child: const Text("Stand"),
-                      ),
-                      ElevatedButton(
-                        onPressed:
-                            (isPlayerTurn && curHand.bet > 0)
-                                ? _surrender
-                                : null,
-                        style: ElevatedButton.styleFrom(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
-                          ),
-                          textStyle: TextStyle(
-                            fontSize: 14,
-                            fontFamily: 'Minecraft',
-                          ),
-                        ),
-                        child: const Text("Surrender"),
-                      ),
-                      ElevatedButton(
-                        onPressed:
-                            (isPlayerTurn && curHand.bet > 0)
-                                ? _doubleDown
-                                : null,
-                        style: ElevatedButton.styleFrom(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
-                          ),
-                          textStyle: TextStyle(
-                            fontSize: 14,
-                            fontFamily: 'Minecraft',
-                          ),
-                        ),
-                        child: const Text("Double Down"),
-                      ),
-                      ElevatedButton(
-                        onPressed:
-                            (isPlayerTurn && curHand.bet > 0)
-                                ? _insurance
-                                : null,
-                        style: ElevatedButton.styleFrom(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
-                          ),
-                          textStyle: TextStyle(
-                            fontSize: 14,
-                            fontFamily: 'Minecraft',
-                          ),
-                        ),
-                        child: const Text("Insurance"),
-                      ),
-                      ElevatedButton(
-                        onPressed:
-                            (isPlayerTurn && curHand.bet > 0) ? _split : null,
-                        style: ElevatedButton.styleFrom(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
-                          ),
-                          textStyle: TextStyle(
-                            fontSize: 14,
-                            fontFamily: 'Minecraft',
-                          ),
-                        ),
-                        child: const Text("Split"),
-                      ),
-                    ],
-                    if (!isTransitioning)
-                      ElevatedButton(
-                        onPressed: _showLeaveConfirmation,
-                        style: ElevatedButton.styleFrom(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
-                          ),
-                          textStyle: TextStyle(
-                            fontSize: 14,
-                            fontFamily: 'Minecraft',
-                          ),
-                        ),
-                        child: const Text("Leave Game"),
-                      ),
-                  ],
-                ),
+              SizedBox(
+                height: MediaQuery.of(context).size.height * 0.68,
+                child: _buildGameSection(),
               ),
-          ],
+              SizedBox(
+                height: MediaQuery.of(context).size.height * 0.25,
+                child: _buildButtonSection(),
+              ),
+            ],
+          ),
         ),
       ),
+    );
+  }
+
+  Widget _buildGameSection() {
+    if (showBetPrompt) {
+      // Temporary bet display
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text("Make a bet to start:"),
+            SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              spacing: 15,
+              children: [
+                for (var value in [1, 5, 10])
+                CustomButton(
+                  text: "\$$value",
+                  onPressed: () {
+                    _addToBet(value.toDouble());
+                  }
+                ),
+              ],
+            ),
+            SizedBox(height: 15),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              spacing: 15,
+              children: [
+                for (var value in [25, 50, 100])
+                CustomButton(
+                  text: "\$$value",
+                  onPressed: () {
+                    _addToBet(value.toDouble());
+                  }
+                ),
+              ],
+            ),
+            SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text("Funds: \$${player.funds}"),
+                SizedBox(width: 20),
+                Text("Bet: \$$bet")
+              ],
+            ),
+          ],
+        ),
+      );
+    }
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text("Dealer"),
+          SizedBox(height: 10),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: List.generate(dealer.hand.length, (index) {
+              //final cardCount = dealer.hand.length;
+              final cardWidth = dealer.hand.length > 3 ? 85.0 : 120.0;
+              if (isPlayerTurn && index == 1) {
+                return Image.asset('assets/cards/CARDBACK.png', width: cardWidth, fit: BoxFit.cover);
+              }
+              else {
+                return PlayingCardWidget(card: dealer.hand[index], width: cardWidth);
+              }
+            })
+          ),
+          SizedBox(height: 25),
+          Text("Player"),
+          SizedBox(height: 10),
+          Container(
+            padding: EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Color.fromRGBO(23, 107, 61, 1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: curHand.hand.map((card) {
+                //final cardCount = curHand.hand.length;
+                final cardWidth = curHand.hand.length > 3 ? 85.0 : 120.0;
+                return PlayingCardWidget(card: card, width: cardWidth);
+              }).toList()
+            ),
+          ),
+          SizedBox(height: 10),
+          Text("Sum: ${curHand.sum}"),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildButtonSection() {
+    if (showBetPrompt) {
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(betMessage),
+          SizedBox(height: 20),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CustomButton(
+                text: "Reset Bet",
+                onPressed: () {
+                  _resetBet();
+                }
+              ),
+              SizedBox(width: 20),
+              CustomButton(
+                text: "Confirm Bet",
+                onPressed: () {
+                  _confirmBet();
+                }
+              )
+            ],
+          )
+        ],
+      );
+    }
+    if (showQuitPrompt) {
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text("Leave game?"),
+          SizedBox(height: 20),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CustomButton(
+                text: "No",
+                onPressed: () {
+                  setState(() {
+                    showQuitPrompt = false;
+                  });
+                }
+              ),
+              SizedBox(width: 50),
+              CustomButton(
+                text: "Yes",
+                onPressed: () {
+                  Navigator.pushReplacementNamed(context, "title");
+                }
+              )
+            ],
+          ),
+        ],
+      );
+    }
+    if (roundOver) {
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(_gameResult),
+          SizedBox(height: 20),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CustomButton(
+                text: "Quit",
+                onPressed: () {
+                  setState(() {
+                    showQuitPrompt = true;
+                  });
+                }
+              ),
+              SizedBox(width: 50),
+              CustomButton(
+                text: "Play Again",
+                onPressed: () {
+                  setState(() {
+                    showBetPrompt = true;
+                    roundOver = false;
+                  });
+                }
+              )
+            ],
+          ),
+        ],
+      );
+    }
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Wrap(
+          spacing: 15,
+          runSpacing: 15,
+          alignment: WrapAlignment.center,
+          children: [
+            CustomButton(
+              text: "Hit",
+              onPressed: () {
+                _hit();
+              },
+              fontSize: 16,
+              shadowOffset: Offset(2, 2),
+            ),
+            CustomButton(
+              text: "Stand",
+              onPressed: () {
+                _stand();
+              },
+              fontSize: 16,
+              shadowOffset: Offset(2, 2),
+            ),
+            CustomButton(
+              text: "Double Down",
+              onPressed: () {
+                _doubleDown();
+              },
+              fontSize: 16,
+              shadowOffset: Offset(2, 2),
+            ),
+            CustomButton(
+              text: "Insurance",
+              onPressed: () {
+                _insurance();
+              },
+              fontSize: 16,
+              shadowOffset: Offset(2, 2),
+            ),
+            CustomButton(
+              text: "Split",
+              onPressed: () {
+                _split();
+              },
+              fontSize: 16,
+              shadowOffset: Offset(2, 2),
+            ),
+            CustomButton(
+              text: "Surrender",
+              onPressed: () {
+                _surrender();
+              },
+              fontSize: 16,
+              shadowOffset: Offset(2, 2),
+            ),
+            CustomButton(
+              text: "Quit Game",
+              onPressed: () {
+                setState(() {
+                  showQuitPrompt = true;
+                });
+              },
+              fontSize: 16,
+              shadowOffset: Offset(2, 2),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStatsSection() {
+    if (showBetPrompt) {
+      return Column();
+    }
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text("Funds: ${player.funds}"),
+              Text("Bet: ${curHand.bet}")
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

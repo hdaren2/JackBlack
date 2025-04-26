@@ -29,13 +29,15 @@ class PlayingCard {
 
 class PlayingCardWidget extends StatelessWidget {
   final PlayingCard card;
+  final double width;
 
   PlayingCardWidget({
-    required this.card
+    required this.card,
+    this.width = 120
   });
 
   @override
   Widget build(BuildContext context) {
-    return Image.asset(card.asset, width: 120, fit: BoxFit.cover);
+    return Image.asset(card.asset, width: width, fit: BoxFit.cover);
   }
 }
