@@ -24,7 +24,8 @@ class _HostGameState extends State<HostGame> {
     _initializeP2P();
   }
 
- Future<void> _initializeP2P() async {
+
+  Future<void> _initializeP2P() async {
     await _p2pManager.initialize();
   }
 
@@ -49,8 +50,9 @@ class _HostGameState extends State<HostGame> {
       );
     }
   }
-  
-@override
+
+
+  @override
   void dispose() {
     _p2pManager.dispose();
     _pinController.dispose();
@@ -84,3 +86,30 @@ class _HostGameState extends State<HostGame> {
               maxLength: 6,
               decoration: InputDecoration(
                 labelText: 'Enter 6-digit PIN',
+                border: OutlineInputBorder(),
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.refresh),
+                  onPressed: () {
+                    final generatedPin = _generatePin();
+                    _pinController.text = generatedPin;
+                  },
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: _connectToServer,
+              child: const Text('Connect'),
+            ),
+            const SizedBox(height: 16),
+            if (_isConnected)
+              const Text(
+                'Connected to the server!',
+                style: TextStyle(color: Colors.green, fontSize: 16),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
