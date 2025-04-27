@@ -350,14 +350,22 @@ class _GamePageState extends State<GamePage> {
             ),
           ),
           SizedBox(height: 10),
-          Text("Sum: ${curHand.sum}"),
+          Text("Sum: ${curHand.sum}",
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+              fontFamily: 'Minecraft',
+              shadows: [Shadow(offset: Offset(2.4, 2.4), blurRadius: 0, color: Color.fromRGBO(63, 63, 63, 1))]
+            ),
+          ),
         ],
       ),
     );
   }
 
   Widget _buildButtonSection() {
-    if (showBetPrompt) {
+    if (showBetPrompt && !showQuitPrompt) {
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -380,7 +388,16 @@ class _GamePageState extends State<GamePage> {
                 }
               )
             ],
-          )
+          ),
+          SizedBox(height: 20),
+          CustomButton(
+            text: "Quit",
+            onPressed: () {
+              setState(() {
+                showQuitPrompt = true;
+              });
+            }
+          ),
         ],
       );
     }
@@ -388,13 +405,22 @@ class _GamePageState extends State<GamePage> {
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text("Leave game?"),
+          Text("Leave game?",
+            style: TextStyle(
+              fontSize: 28,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+              fontFamily: 'Minecraft',
+              shadows: [Shadow(offset: Offset(2.4, 2.4), blurRadius: 0, color: Color.fromRGBO(63, 63, 63, 1))]
+            ),
+          ),
           SizedBox(height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               CustomButton(
                 text: "No",
+                width: 78,
                 onPressed: () {
                   setState(() {
                     showQuitPrompt = false;
@@ -417,7 +443,15 @@ class _GamePageState extends State<GamePage> {
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(_gameResult),
+          Text(_gameResult,
+            style: TextStyle(
+              fontSize: 19,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+              fontFamily: 'Minecraft',
+              shadows: [Shadow(offset: Offset(3, 2.7), blurRadius: 0, color: Color.fromRGBO(63, 63, 63, 1))]
+            ),
+          ),
           SizedBox(height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -529,8 +563,24 @@ class _GamePageState extends State<GamePage> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text("Funds: ${player.funds}"),
-              Text("Bet: ${curHand.bet}")
+              Text("Funds: \$${player.funds}",
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  fontFamily: 'Minecraft',
+                  shadows: [Shadow(offset: Offset(2.4, 2.4), blurRadius: 0, color: Color.fromRGBO(63, 63, 63, 1))]
+                ),
+              ),
+              Text("Bet: \$${curHand.bet}",
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  fontFamily: 'Minecraft',
+                  shadows: [Shadow(offset: Offset(2.4, 2.4), blurRadius: 0, color: Color.fromRGBO(63, 63, 63, 1))]
+                ),
+              ),
             ],
           ),
         ),

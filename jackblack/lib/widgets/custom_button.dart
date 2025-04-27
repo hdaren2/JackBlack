@@ -19,12 +19,14 @@ class CustomButton extends StatelessWidget {
   const CustomButton({super.key,
     required this.text,
     this.onPressed,
+    this.width,
     this.fontSize = 23,
     this.shadowOffset = const Offset(3, 2.5)
   });
 
   final String text;
   final Function()? onPressed;
+  final double? width;  
   final double fontSize;
   final Offset shadowOffset;
 
