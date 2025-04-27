@@ -23,3 +23,29 @@ class _HostGameState extends State<HostGame> {
     super.initState();
     _initializeP2P();
   }
+  
+ Future<void> _initializeP2P() async {
+    await _p2pManager.initialize();
+  }
+
+
+  String _generatePin() {
+    final random = Random();
+    return (random.nextInt(900000) + 100000).toString(); // Generate a 6-digit PIN
+  }
+
+
+  void _connectToServer() {
+    final pin = _pinController.text;
+    if (pin.length == 6) {
+      // Logic to connect to the server using the PIN
+      setState(() {
+        _isConnected = true;
+      });
+      print('Connected with PIN: $pin');
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter a valid 6-digit PIN.')),
+      );
+    }
+  }
