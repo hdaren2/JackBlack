@@ -23,7 +23,7 @@ class _HostGameState extends State<HostGame> {
     super.initState();
     _initializeP2P();
   }
-  
+
  Future<void> _initializeP2P() async {
     await _p2pManager.initialize();
   }
@@ -49,3 +49,38 @@ class _HostGameState extends State<HostGame> {
       );
     }
   }
+  
+@override
+  void dispose() {
+    _p2pManager.dispose();
+    _pinController.dispose();
+    super.dispose();
+  }
+
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Host Game'),
+        backgroundColor: Colors.deepPurple,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const Text(
+              'Host a Game',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _pinController,
+              keyboardType: TextInputType.number,
+              maxLength: 6,
+              decoration: InputDecoration(
+                labelText: 'Enter 6-digit PIN',
