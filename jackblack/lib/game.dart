@@ -116,6 +116,9 @@ class _GamePageState extends State<GamePage> {
         _gameResult = "You busted with $playerScore! Dealer wins.";
         nextHand();
       }
+      else if (playerScore == 21) {
+        nextHand();
+      }
     });
   }
 
