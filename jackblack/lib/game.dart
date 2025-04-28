@@ -241,7 +241,15 @@ class _GamePageState extends State<GamePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text("Make a bet to start:"),
+            Text("Make a bet to start:",
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+                fontFamily: 'Minecraft',
+                shadows: [Shadow(offset: Offset(3.9, 3.9), blurRadius: 0, color: Color.fromRGBO(63, 63, 63, 1))]
+              ),
+            ),
             SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
