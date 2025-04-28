@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:jackblack/gameplay_instructions.dart';
+import 'package:jackblack/widgets/custom_button.dart';
 
 class TitlePage extends StatelessWidget {
   const TitlePage({super.key});
@@ -23,39 +24,18 @@ class TitlePage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 40),
-            ElevatedButton(
+            CustomButton(
+              text: "Start Game",
               onPressed: () {
                 Navigator.pushReplacementNamed(context, "mode");
               },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color.fromRGBO(198, 255, 202, 1),
-                foregroundColor: const Color.fromRGBO(0, 0, 0, 1),
-                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
-                textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              child: const Text("Start Game", style: TextStyle(fontFamily: 'Minecraft')),
             ),
             const SizedBox(height: 30),
-            ElevatedButton(
+             CustomButton(
+              text: "How to Play",
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const GameplayInstructions()),
-                );
+                Navigator.push(context, MaterialPageRoute(builder: (context) => const GameplayInstructions()));
               },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color.fromRGBO(198, 255, 202, 1),
-                foregroundColor: const Color.fromRGBO(0, 0, 0, 1),
-                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
-                textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              child: const Text("How to Play", style: TextStyle(fontFamily: 'Minecraft')),
             ),
           ],
         ),
