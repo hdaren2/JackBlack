@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:jackblack/rooms/room.dart';
+import 'package:jackblack/widgets/custom_button.dart';
 import 'package:jackblack/rooms/multiplayer_game.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 class RoomSelectionPage extends StatefulWidget {
-  const RoomSelectionPage({super.key});
+  final bool isHosting;
+
+  const RoomSelectionPage({super.key, required this.isHosting});
 
   @override
   State<RoomSelectionPage> createState() => _RoomSelectionPageState();
@@ -12,8 +14,9 @@ class RoomSelectionPage extends StatefulWidget {
 
 class _RoomSelectionPageState extends State<RoomSelectionPage> {
   final RoomService _roomService = RoomService();
-  List<Room> _availableRooms = [];
+  List<Room> _rooms = [];
   bool _isLoading = true;
+  final TextEditingController _roomIdController = TextEditingController();
 
   @override
   void initState() {
@@ -22,16 +25,15 @@ class _RoomSelectionPageState extends State<RoomSelectionPage> {
   }
 
   Future<void> _loadRooms() async {
+    setState(() => _isLoading = true);
     try {
       final rooms = await _roomService.getAvailableRooms();
       setState(() {
-        _availableRooms = rooms;
+        _rooms = rooms;
         _isLoading = false;
       });
     } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
+      setState(() => _isLoading = false);
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Error loading rooms: $e')));
@@ -40,13 +42,10 @@ class _RoomSelectionPageState extends State<RoomSelectionPage> {
 
   Future<void> _createRoom() async {
     try {
-      final user = Supabase.instance.client.auth.currentUser;
-      if (user == null) throw Exception('User not logged in');
-
-      final room = await _roomService.createRoom(user.id);
-      if (!mounted) return;
-
-      Navigator.pushReplacement(
+      final room = await _roomService.createRoom(
+        'current_user_id',
+      ); // TODO: Replace with actual user ID
+      Navigator.push(
         context,
         MaterialPageRoute(
           builder: (context) => MultiplayerGamePage(room: room),
@@ -59,18 +58,16 @@ class _RoomSelectionPageState extends State<RoomSelectionPage> {
     }
   }
 
-  Future<void> _joinRoom(Room room) async {
+  Future<void> _joinRoom(String roomId) async {
     try {
-      final user = Supabase.instance.client.auth.currentUser;
-      if (user == null) throw Exception('User not logged in');
-
-      final updatedRoom = await _roomService.joinRoom(room.id, user.id);
-      if (!mounted) return;
-
-      Navigator.pushReplacement(
+      final room = await _roomService.joinRoom(
+        roomId,
+        'current_user_id',
+      ); // TODO: Replace with actual user ID
+      Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => MultiplayerGamePage(room: updatedRoom),
+          builder: (context) => MultiplayerGamePage(room: room),
         ),
       );
     } catch (e) {
@@ -83,28 +80,27 @@ class _RoomSelectionPageState extends State<RoomSelectionPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color.fromRGBO(33, 126, 75, 1),
+      backgroundColor: const Color.fromRGBO(33, 126, 75, 1),
       appBar: AppBar(
-        title: Text('Multiplayer Rooms'),
-        backgroundColor: Color.fromRGBO(33, 126, 75, 1),
+        title: Text(widget.isHosting ? 'Host Game' : 'Join Game'),
+        backgroundColor: const Color.fromRGBO(33, 126, 75, 1),
       ),
       body:
           _isLoading
-              ? Center(child: CircularProgressIndicator())
+              ? const Center(child: CircularProgressIndicator())
               : RefreshIndicator(
                 onRefresh: _loadRooms,
                 child: ListView(
-                  padding: EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(16),
                   children: [
-                    ElevatedButton(
-                      onPressed: _createRoom,
-                      child: Text('Create New Room'),
-                      style: ElevatedButton.styleFrom(
-                        minimumSize: Size(double.infinity, 50),
+                    if (widget.isHosting) ...[
+                      CustomButton(
+                        text: "Create New Room",
+                        onPressed: _createRoom,
                       ),
-                    ),
-                    SizedBox(height: 20),
-                    Text(
+                      const SizedBox(height: 20),
+                    ],
+                    const Text(
                       'Available Rooms',
                       style: TextStyle(
                         fontSize: 20,
@@ -112,29 +108,24 @@ class _RoomSelectionPageState extends State<RoomSelectionPage> {
                         color: Colors.white,
                       ),
                     ),
-                    SizedBox(height: 10),
-                    if (_availableRooms.isEmpty)
-                      Center(
-                        child: Text(
-                          'No rooms available. Create one!',
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      )
-                    else
-                      ..._availableRooms.map(
-                        (room) => Card(
-                          child: ListTile(
-                            title: Text('Room ${room.id.substring(0, 8)}'),
-                            subtitle: Text(
-                              '${room.playerIds.length}/${room.maxPlayers} players',
-                            ),
-                            trailing: ElevatedButton(
-                              onPressed: () => _joinRoom(room),
-                              child: Text('Join'),
-                            ),
+                    const SizedBox(height: 10),
+                    ..._rooms.map(
+                      (room) => Card(
+                        child: ListTile(
+                          title: Text('Room ${room.id}'),
+                          subtitle: Text(
+                            '${room.playerIds.length}/${room.maxPlayers} players',
                           ),
+                          trailing:
+                              !widget.isHosting
+                                  ? ElevatedButton(
+                                    onPressed: () => _joinRoom(room.id),
+                                    child: const Text('Join'),
+                                  )
+                                  : null,
                         ),
                       ),
+                    ),
                   ],
                 ),
               ),
