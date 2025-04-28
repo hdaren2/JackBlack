@@ -19,16 +19,18 @@ class CustomButton extends StatelessWidget {
   const CustomButton({super.key,
     required this.text,
     this.onPressed,
-    this.width,
     this.fontSize = 23,
-    this.shadowOffset = const Offset(3, 2.5)
+    this.shadowOffset = const Offset(3, 2.5),
+    this.width,
+    this.height
   });
 
   final String text;
   final Function()? onPressed;
-  final double? width;  
   final double fontSize;
   final Offset shadowOffset;
+  final double? width;  
+  final double? height;
 
   @override
   Widget build(BuildContext context) {
@@ -37,6 +39,8 @@ class CustomButton extends StatelessWidget {
       child: InkWell(
         onTap: onPressed,
         child: Container(
+          width: width,
+          height: height,
           padding: EdgeInsets.all(10),
           decoration: BoxDecoration(
             color: Colors.grey.shade500,
@@ -67,6 +71,7 @@ class CustomButton extends StatelessWidget {
           ),
           child: Text(
             text,
+            textAlign: TextAlign.center,
             style: TextStyle(fontSize: fontSize, color: Colors.white, shadows: [Shadow(offset: shadowOffset, blurRadius: 0, color: Color.fromRGBO(63, 63, 63, 1))])
           ),
         ),
