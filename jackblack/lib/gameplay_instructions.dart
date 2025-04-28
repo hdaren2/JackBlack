@@ -31,7 +31,7 @@ class GameplayInstructions extends StatelessWidget {
                   ),
                   SizedBox(height: 8),
                   Text(
-                    '- Kings, Queens, and Jokers are worth 10 points. Aces are worth 11 points.',
+                    '- Kings, Queens, and Jokers are worth 10 points. Aces are worth 1 or 11 points, whichever is better for the player.',
                     style: _textStyle,
                   ),
                   SizedBox(height: 8),
