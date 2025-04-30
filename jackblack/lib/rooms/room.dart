@@ -7,6 +7,7 @@ class Room {
   final int maxPlayers;
   final bool isGameStarted;
   final DateTime createdAt;
+  final String name;
 
   Room({
     required this.id,
@@ -15,6 +16,7 @@ class Room {
     required this.maxPlayers,
     required this.isGameStarted,
     required this.createdAt,
+    required this.name,
   });
 
   factory Room.fromJson(Map<String, dynamic> json) {
@@ -25,6 +27,7 @@ class Room {
       maxPlayers: json['max_players'] as int,
       isGameStarted: json['is_game_started'] as bool,
       createdAt: DateTime.parse(json['created_at'] as String),
+      name: json['name'] as String,
     );
   }
 
@@ -36,6 +39,7 @@ class Room {
       'max_players': maxPlayers,
       'is_game_started': isGameStarted,
       'created_at': createdAt.toIso8601String(),
+      'name': name,
     };
   }
 }
@@ -43,7 +47,7 @@ class Room {
 class RoomService {
   final SupabaseClient _supabase = Supabase.instance.client;
 
-  Future<Room> createRoom(String hostId) async {
+  Future<Room> createRoom(String hostId, String roomName) async {
     final response =
         await _supabase
             .from('rooms')
@@ -52,6 +56,8 @@ class RoomService {
               'player_ids': [hostId],
               'max_players': 4,
               'is_game_started': false,
+              'created_at': DateTime.now().toIso8601String(),
+              'name': roomName,
             })
             .select()
             .single();

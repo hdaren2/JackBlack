@@ -17,13 +17,19 @@ class _RoomSelectionPageState extends State<RoomSelectionPage> {
   final RoomService _roomService = RoomService();
   List<Room> _rooms = [];
   bool _isLoading = true;
-  final TextEditingController _roomIdController = TextEditingController();
+  final TextEditingController _roomNameController = TextEditingController();
   final AuthService _authService = AuthService();
 
   @override
   void initState() {
     super.initState();
     _loadRooms();
+  }
+
+  @override
+  void dispose() {
+    _roomNameController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadRooms() async {
@@ -43,10 +49,19 @@ class _RoomSelectionPageState extends State<RoomSelectionPage> {
   }
 
   Future<void> _createRoom() async {
+    if (_roomNameController.text.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Please enter a room name')));
+      return;
+    }
+
     try {
       final room = await _roomService.createRoom(
         _authService.getUUID().toString(),
-      ); // TODO: Replace with actual user ID
+        _roomNameController.text,
+      );
+      _roomNameController.clear();
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -96,6 +111,16 @@ class _RoomSelectionPageState extends State<RoomSelectionPage> {
                   padding: const EdgeInsets.all(16),
                   children: [
                     if (widget.isHosting) ...[
+                      TextField(
+                        controller: _roomNameController,
+                        decoration: const InputDecoration(
+                          labelText: 'Room Name',
+                          filled: true,
+                          fillColor: Colors.white,
+                          border: OutlineInputBorder(),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
                       CustomButton(
                         text: "Create New Room",
                         onPressed: _createRoom,
@@ -114,7 +139,7 @@ class _RoomSelectionPageState extends State<RoomSelectionPage> {
                     ..._rooms.map(
                       (room) => Card(
                         child: ListTile(
-                          title: Text('Room ${room.id}'),
+                          title: Text(room.name),
                           subtitle: Text(
                             '${room.playerIds.length}/${room.maxPlayers} players',
                           ),

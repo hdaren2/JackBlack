@@ -30,19 +30,30 @@ class _MultiplayerGamePageState extends State<MultiplayerGamePage> {
     super.initState();
     _initializePlayers();
     _subscribeToRoom();
+    _setupInitialGameState();
+  }
+
+  void _setupInitialGameState() {
+    // Initialize the game state for all players
+    for (final player in players) {
+      player.addEmptyHand();
+      player.hands[0].bet = 100.0; // Set initial bet
+    }
   }
 
   void _initializePlayers() {
     final user = Supabase.instance.client.auth.currentUser;
     if (user == null) return;
 
+    // Always add the current user as a player
+    players.add(Player(name: "You", funds: 1000.0));
+
+    // Add other players if they exist
     for (final playerId in widget.room.playerIds) {
-      players.add(
-        Player(
-          name: playerId == user.id ? "You" : "Player ${players.length + 1}",
-          funds: 1000.0,
-        ),
-      );
+      if (playerId != user.id) {
+        // Skip the current user since we already added them
+        players.add(Player(name: "Player ${players.length}", funds: 1000.0));
+      }
     }
   }
 
@@ -58,16 +69,21 @@ class _MultiplayerGamePageState extends State<MultiplayerGamePage> {
   }
 
   void _startGame() {
+    if (players.isEmpty) return; // Don't start if no players
+
     setState(() {
       // Deal initial cards
       for (final player in players) {
-        player.addEmptyHand();
+        if (player.hands.isEmpty) {
+          player.addEmptyHand();
+        }
         player.hands[0].add(shoe.deal());
         player.hands[0].add(shoe.deal());
       }
       dealer.add(shoe.deal());
       dealer.add(shoe.deal());
       _gameMessage = "Game started!";
+      isGameStarted = true;
     });
   }
 
@@ -136,7 +152,7 @@ class _MultiplayerGamePageState extends State<MultiplayerGamePage> {
     return Scaffold(
       backgroundColor: Color.fromRGBO(33, 126, 75, 1),
       appBar: AppBar(
-        title: Text('Room ${widget.room.id.substring(0, 8)}'),
+        title: Text(widget.room.name),
         backgroundColor: Color.fromRGBO(33, 126, 75, 1),
       ),
       body: Column(
