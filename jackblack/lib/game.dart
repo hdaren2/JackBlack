@@ -282,15 +282,25 @@ class _GamePageState extends State<GamePage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text("Funds: \$${player.funds}",
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                  fontFamily: 'Minecraft',
-                  shadows: [Shadow(offset: Offset(2.9,3.1), blurRadius: 0,color: Color.fromRGBO(63, 63, 63, 1))]
-                ),
-                ),
+                Row(
+                children: [
+                  Image.asset(
+                    'assets/Screenshot 2025-04-23 at 4.03.13 PM-1.png.png',
+                    width: 20,
+                    height: 20,
+                  ),
+                  SizedBox(width: 5),
+                  Text("\$${player.funds}",
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      fontFamily: 'Minecraft',
+                      shadows: [Shadow(offset: Offset(2.4, 2.4), blurRadius: 0, color: Color.fromRGBO(63, 63, 63, 1))]
+                    ),
+                  ),
+                ],
+              ),
                 SizedBox(width: 20),
                 Text("Bet: \$$bet",
                 style: TextStyle(
@@ -574,14 +584,24 @@ class _GamePageState extends State<GamePage> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text("Funds: \$${player.funds}",
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                  fontFamily: 'Minecraft',
-                  shadows: [Shadow(offset: Offset(2.4, 2.4), blurRadius: 0, color: Color.fromRGBO(63, 63, 63, 1))]
-                ),
+              Row(
+                children: [
+                  Image.asset(
+                    'assets/Screenshot 2025-04-23 at 4.03.13 PM-1.png.png',
+                    width: 20,
+                    height: 20,
+                  ),
+                  SizedBox(width: 5),
+                  Text("\$${player.funds}",
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      fontFamily: 'Minecraft',
+                      shadows: [Shadow(offset: Offset(2.4, 2.4), blurRadius: 0, color: Color.fromRGBO(63, 63, 63, 1))]
+                    ),
+                  ),
+                ],
               ),
               Text("Bet: \$${curHand.bet}",
                 style: TextStyle(
