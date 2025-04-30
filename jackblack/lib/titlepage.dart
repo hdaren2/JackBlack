@@ -21,6 +21,13 @@ class TitlePage extends StatelessWidget {
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
                 fontFamily: 'Minecraft',
+                shadows: [
+                  Shadow(
+                    offset: Offset(5, 5),
+                    blurRadius: 0,
+                    color: Color.fromRGBO(63, 63, 63, 1),
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: 40),
