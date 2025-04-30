@@ -26,4 +26,9 @@ class AuthService {
     final metadata = user?.userMetadata;
     return metadata?['username'];
   }
+
+  String? getUUID() {
+    final user = supabase.auth.currentUser;
+    return user?.id;
+  }
 }

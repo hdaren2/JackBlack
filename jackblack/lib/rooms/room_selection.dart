@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:jackblack/rooms/room.dart';
+import 'package:jackblack/users/auth_service.dart';
 import 'package:jackblack/widgets/custom_button.dart';
 import 'package:jackblack/rooms/multiplayer_game.dart';
 
@@ -17,6 +18,7 @@ class _RoomSelectionPageState extends State<RoomSelectionPage> {
   List<Room> _rooms = [];
   bool _isLoading = true;
   final TextEditingController _roomIdController = TextEditingController();
+  final AuthService _authService = AuthService();
 
   @override
   void initState() {
@@ -43,7 +45,7 @@ class _RoomSelectionPageState extends State<RoomSelectionPage> {
   Future<void> _createRoom() async {
     try {
       final room = await _roomService.createRoom(
-        'current_user_id',
+        _authService.getUUID().toString(),
       ); // TODO: Replace with actual user ID
       Navigator.push(
         context,
@@ -62,7 +64,7 @@ class _RoomSelectionPageState extends State<RoomSelectionPage> {
     try {
       final room = await _roomService.joinRoom(
         roomId,
-        'current_user_id',
+        _authService.getUUID().toString(),
       ); // TODO: Replace with actual user ID
       Navigator.push(
         context,

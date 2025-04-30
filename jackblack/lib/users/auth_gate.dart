@@ -13,9 +13,7 @@ to create an account (RegisterPage).
 
 */
 class AuthGate extends StatelessWidget {
-  AuthGate({super.key});
-
-  // final authSubscription = Supabase.instance.client.auth.onAuthStateChange.listen((data));
+  const AuthGate({super.key});
 
   @override
   Widget build(BuildContext context) {

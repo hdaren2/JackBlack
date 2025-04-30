@@ -1,8 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:jackblack/modepage.dart';
 import 'package:jackblack/titlepage.dart';
+import 'package:jackblack/users/auth_gate.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-void main() {
+
+void main() async {
+  // Supabase setup stuff
+  await Supabase.initialize(
+    url: "https://ahvxqvmprnrljncqiotz.supabase.co",
+    anonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFodnhxdm1wcm5ybGpuY3Fpb3R6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDU0MTc5MzYsImV4cCI6MjA2MDk5MzkzNn0.pZXJfYht7PsrqEiSagk0vgsN61bh0VpQkPoXtYxru6U",
+  );
+
   runApp(const MyApp());
 }
 
@@ -22,8 +31,9 @@ class MyApp extends StatelessWidget {
           titleSmall: TextStyle(fontFamily: 'Minecraft'),
         ),
       ),
-      initialRoute: "title",
+      initialRoute: "auth",
       routes: {
+        "auth": (context) => const AuthGate(),
         "title": (context) => const TitlePage(),
         "mode": (context) => const ModePage(),
       },
