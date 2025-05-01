@@ -3,6 +3,7 @@ import 'package:jackblack/rooms/room.dart';
 import 'package:jackblack/users/auth_service.dart';
 import 'package:jackblack/widgets/custom_button.dart';
 import 'package:jackblack/rooms/multiplayer_game.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class RoomSelectionPage extends StatefulWidget {
   final bool isHosting;
@@ -19,6 +20,7 @@ class _RoomSelectionPageState extends State<RoomSelectionPage> {
   bool _isLoading = true;
   final TextEditingController _roomNameController = TextEditingController();
   final AuthService _authService = AuthService();
+  final Map<String, int> _roomPlayerCounts = {};
 
   @override
   void initState() {
@@ -40,6 +42,14 @@ class _RoomSelectionPageState extends State<RoomSelectionPage> {
         _rooms = rooms;
         _isLoading = false;
       });
+
+      // Update player counts for each room
+      for (final room in rooms) {
+        final count = _roomService.getActivePlayerCount(room.id);
+        setState(() {
+          _roomPlayerCounts[room.id] = count;
+        });
+      }
     } catch (e) {
       setState(() => _isLoading = false);
       ScaffoldMessenger.of(
@@ -65,7 +75,11 @@ class _RoomSelectionPageState extends State<RoomSelectionPage> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => MultiplayerGamePage(room: room),
+          builder:
+              (context) => MultiplayerGamePage(
+                room: room,
+                user: Supabase.instance.client.auth.currentUser!,
+              ),
         ),
       );
     } catch (e) {
@@ -80,11 +94,15 @@ class _RoomSelectionPageState extends State<RoomSelectionPage> {
       final room = await _roomService.joinRoom(
         roomId,
         _authService.getUUID().toString(),
-      ); // TODO: Replace with actual user ID
+      );
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => MultiplayerGamePage(room: room),
+          builder:
+              (context) => MultiplayerGamePage(
+                room: room,
+                user: Supabase.instance.client.auth.currentUser!,
+              ),
         ),
       );
     } catch (e) {
@@ -141,7 +159,7 @@ class _RoomSelectionPageState extends State<RoomSelectionPage> {
                         child: ListTile(
                           title: Text(room.name),
                           subtitle: Text(
-                            '${room.playerIds.length}/${room.maxPlayers} players',
+                            '${_roomPlayerCounts[room.id] ?? 0}/${room.maxPlayers} players',
                           ),
                           trailing:
                               !widget.isHosting
