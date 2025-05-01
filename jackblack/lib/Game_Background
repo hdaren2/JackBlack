@@ -47,7 +47,7 @@ class FirstRoute extends StatelessWidget {
     );
   }
 }
-
+// player positions
 class BlackjackTablePainter extends CustomPainter {
   List<Map<String, dynamic>> _getPlayerPositions(Size size) {
     return [
@@ -57,7 +57,7 @@ class BlackjackTablePainter extends CustomPainter {
       {'pos': Offset(size.width * 0.8, size.height * 0.6), 'label': 'PLAYER 4'},
     ];
   }
-
+// player card sizes to make it uniform
   void _drawPlayerPositions(Canvas canvas, Size size, Paint cardAreaPaint, List<Map<String, dynamic>> playerPositions) {
     for (var player in playerPositions) {
       var position = player['pos'] as Offset;
