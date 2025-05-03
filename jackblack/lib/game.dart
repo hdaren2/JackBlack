@@ -115,8 +115,7 @@ class _GamePageState extends State<GamePage> {
       if (playerScore > 21) {
         _gameResult = "You busted with $playerScore! Dealer wins.";
         nextHand();
-      }
-      else if (playerScore == 21) {
+      } else if (playerScore == 21) {
         nextHand();
       }
     });
@@ -189,16 +188,14 @@ class _GamePageState extends State<GamePage> {
             betMessage = "";
           });
         });
-      }
-      else if (bet > player.funds) {
+      } else if (bet > player.funds) {
         betMessage = "Insufficient funds.";
         Future.delayed(const Duration(seconds: 2), () {
           setState(() {
             betMessage = "";
           });
         });
-      }
-      else {
+      } else {
         player.bet(curHand, bet);
         betMessage = "";
         showBetPrompt = false;
@@ -241,13 +238,20 @@ class _GamePageState extends State<GamePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text("Make a bet to start:",
+            Text(
+              "Make a bet to start:",
               style: TextStyle(
                 fontSize: 28,
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
                 fontFamily: 'Minecraft',
-                shadows: [Shadow(offset: Offset(3.9, 3.9), blurRadius: 0, color: Color.fromRGBO(63, 63, 63, 1))]
+                shadows: [
+                  Shadow(
+                    offset: Offset(3.9, 3.9),
+                    blurRadius: 0,
+                    color: Color.fromRGBO(63, 63, 63, 1),
+                  ),
+                ],
               ),
             ),
             SizedBox(height: 20),
@@ -256,12 +260,12 @@ class _GamePageState extends State<GamePage> {
               spacing: 15,
               children: [
                 for (var value in [1, 5, 10])
-                CustomButton(
-                  text: "\$$value",
-                  onPressed: () {
-                    _addToBet(value.toDouble());
-                  }
-                ),
+                  CustomButton(
+                    text: "\$$value",
+                    onPressed: () {
+                      _addToBet(value.toDouble());
+                    },
+                  ),
               ],
             ),
             SizedBox(height: 15),
@@ -270,12 +274,12 @@ class _GamePageState extends State<GamePage> {
               spacing: 15,
               children: [
                 for (var value in [25, 50, 100])
-                CustomButton(
-                  text: "\$$value",
-                  onPressed: () {
-                    _addToBet(value.toDouble());
-                  }
-                ),
+                  CustomButton(
+                    text: "\$$value",
+                    onPressed: () {
+                      _addToBet(value.toDouble());
+                    },
+                  ),
               ],
             ),
             SizedBox(height: 20),
@@ -283,33 +287,47 @@ class _GamePageState extends State<GamePage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Row(
-                children: [
-                  Image.asset(
-                    'assets/Screenshot 2025-04-23 at 4.03.13 PM-1.png.png',
-                    width: 20,
-                    height: 20,
-                  ),
-                  SizedBox(width: 5),
-                  Text("\$${player.funds}",
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                      fontFamily: 'Minecraft',
-                      shadows: [Shadow(offset: Offset(2.4, 2.4), blurRadius: 0, color: Color.fromRGBO(63, 63, 63, 1))]
+                  children: [
+                    Image.asset(
+                      'assets/Screenshot 2025-04-23 at 4.03.13 PM-1.png.png',
+                      width: 20,
+                      height: 20,
                     ),
-                  ),
-                ],
-              ),
-                SizedBox(width: 20),
-                Text("Bet: \$$bet",
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                  fontFamily: 'Minecraft',
-                  shadows: [Shadow(offset: Offset(2.9,3.1), blurRadius: 0, color: Color.fromRGBO(63,63,63,1))]
+                    SizedBox(width: 5),
+                    Text(
+                      "\$${player.funds}",
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        fontFamily: 'Minecraft',
+                        shadows: [
+                          Shadow(
+                            offset: Offset(2.4, 2.4),
+                            blurRadius: 0,
+                            color: Color.fromRGBO(63, 63, 63, 1),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
+                SizedBox(width: 20),
+                Text(
+                  "Bet: \$$bet",
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    fontFamily: 'Minecraft',
+                    shadows: [
+                      Shadow(
+                        offset: Offset(2.9, 3.1),
+                        blurRadius: 0,
+                        color: Color.fromRGBO(63, 63, 63, 1),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -321,13 +339,21 @@ class _GamePageState extends State<GamePage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text("Dealer", style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-            fontFamily: 'Minecraft',
-            shadows: [Shadow(offset:Offset(2.4, 2.4), blurRadius: 0, color: Color.fromRGBO(63, 63, 63, 1))]
-          ),
+          Text(
+            "Dealer",
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+              fontFamily: 'Minecraft',
+              shadows: [
+                Shadow(
+                  offset: Offset(2.4, 2.4),
+                  blurRadius: 0,
+                  color: Color.fromRGBO(63, 63, 63, 1),
+                ),
+              ],
+            ),
           ),
           SizedBox(height: 10),
           Wrap(
@@ -337,21 +363,35 @@ class _GamePageState extends State<GamePage> {
               //final cardCount = dealer.hand.length;
               final cardWidth = dealer.hand.length > 3 ? 85.0 : 120.0;
               if (isPlayerTurn && index == 1) {
-                return Image.asset('assets/cards/CARDBACK.png', width: cardWidth, fit: BoxFit.cover);
+                return Image.asset(
+                  'assets/cards/CARDBACK.png',
+                  width: cardWidth,
+                  fit: BoxFit.cover,
+                );
+              } else {
+                return PlayingCardWidget(
+                  card: dealer.hand[index],
+                  width: cardWidth,
+                );
               }
-              else {
-                return PlayingCardWidget(card: dealer.hand[index], width: cardWidth);
-              }
-            })
+            }),
           ),
           SizedBox(height: 25),
-          Text("Player",  style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-            fontFamily: 'Minecraft',
-            shadows: [Shadow(offset:Offset(2.4, 2.4), blurRadius: 0, color: Color.fromRGBO(63, 63, 63, 1))]
-          ),
+          Text(
+            "Player",
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+              fontFamily: 'Minecraft',
+              shadows: [
+                Shadow(
+                  offset: Offset(2.4, 2.4),
+                  blurRadius: 0,
+                  color: Color.fromRGBO(63, 63, 63, 1),
+                ),
+              ],
+            ),
           ),
           SizedBox(height: 10),
           Container(
@@ -363,21 +403,29 @@ class _GamePageState extends State<GamePage> {
             child: Wrap(
               spacing: 8,
               runSpacing: 8,
-              children: curHand.hand.map((card) {
-                //final cardCount = curHand.hand.length;
-                final cardWidth = curHand.hand.length > 3 ? 85.0 : 120.0;
-                return PlayingCardWidget(card: card, width: cardWidth);
-              }).toList()
+              children:
+                  curHand.hand.map((card) {
+                    //final cardCount = curHand.hand.length;
+                    final cardWidth = curHand.hand.length > 3 ? 85.0 : 120.0;
+                    return PlayingCardWidget(card: card, width: cardWidth);
+                  }).toList(),
             ),
           ),
           SizedBox(height: 10),
-          Text("Sum: ${curHand.sum}",
+          Text(
+            "Sum: ${curHand.sum}",
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.bold,
               color: Colors.white,
               fontFamily: 'Minecraft',
-              shadows: [Shadow(offset: Offset(2.4, 2.4), blurRadius: 0, color: Color.fromRGBO(63, 63, 63, 1))]
+              shadows: [
+                Shadow(
+                  offset: Offset(2.4, 2.4),
+                  blurRadius: 0,
+                  color: Color.fromRGBO(63, 63, 63, 1),
+                ),
+              ],
             ),
           ),
         ],
@@ -399,15 +447,15 @@ class _GamePageState extends State<GamePage> {
                 text: "Reset Bet",
                 onPressed: () {
                   _resetBet();
-                }
+                },
               ),
               SizedBox(width: 20),
               CustomButton(
                 text: "Confirm Bet",
                 onPressed: () {
                   _confirmBet();
-                }
-              )
+                },
+              ),
             ],
           ),
           SizedBox(height: 20),
@@ -417,7 +465,7 @@ class _GamePageState extends State<GamePage> {
               setState(() {
                 showQuitPrompt = true;
               });
-            }
+            },
           ),
         ],
       );
@@ -426,13 +474,20 @@ class _GamePageState extends State<GamePage> {
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text("Leave game?",
+          Text(
+            "Leave game?",
             style: TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.bold,
               color: Colors.white,
               fontFamily: 'Minecraft',
-              shadows: [Shadow(offset: Offset(2.4, 2.4), blurRadius: 0, color: Color.fromRGBO(63, 63, 63, 1))]
+              shadows: [
+                Shadow(
+                  offset: Offset(2.4, 2.4),
+                  blurRadius: 0,
+                  color: Color.fromRGBO(63, 63, 63, 1),
+                ),
+              ],
             ),
           ),
           SizedBox(height: 20),
@@ -446,15 +501,15 @@ class _GamePageState extends State<GamePage> {
                   setState(() {
                     showQuitPrompt = false;
                   });
-                }
+                },
               ),
               SizedBox(width: 50),
               CustomButton(
                 text: "Yes",
                 onPressed: () {
                   Navigator.pushReplacementNamed(context, "title");
-                }
-              )
+                },
+              ),
             ],
           ),
         ],
@@ -464,13 +519,20 @@ class _GamePageState extends State<GamePage> {
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(_gameResult,
+          Text(
+            _gameResult,
             style: TextStyle(
               fontSize: 19,
               fontWeight: FontWeight.bold,
               color: Colors.white,
               fontFamily: 'Minecraft',
-              shadows: [Shadow(offset: Offset(3, 2.7), blurRadius: 0, color: Color.fromRGBO(63, 63, 63, 1))]
+              shadows: [
+                Shadow(
+                  offset: Offset(3, 2.7),
+                  blurRadius: 0,
+                  color: Color.fromRGBO(63, 63, 63, 1),
+                ),
+              ],
             ),
           ),
           SizedBox(height: 20),
@@ -483,7 +545,7 @@ class _GamePageState extends State<GamePage> {
                   setState(() {
                     showQuitPrompt = true;
                   });
-                }
+                },
               ),
               SizedBox(width: 50),
               CustomButton(
@@ -493,8 +555,8 @@ class _GamePageState extends State<GamePage> {
                     showBetPrompt = true;
                     roundOver = false;
                   });
-                }
-              )
+                },
+              ),
             ],
           ),
         ],
@@ -592,24 +654,38 @@ class _GamePageState extends State<GamePage> {
                     height: 20,
                   ),
                   SizedBox(width: 5),
-                  Text("\$${player.funds}",
+                  Text(
+                    "\$${player.funds}",
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
                       fontFamily: 'Minecraft',
-                      shadows: [Shadow(offset: Offset(2.4, 2.4), blurRadius: 0, color: Color.fromRGBO(63, 63, 63, 1))]
+                      shadows: [
+                        Shadow(
+                          offset: Offset(2.4, 2.4),
+                          blurRadius: 0,
+                          color: Color.fromRGBO(63, 63, 63, 1),
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ),
-              Text("Bet: \$${curHand.bet}",
+              Text(
+                "Bet: \$${curHand.bet}",
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                   fontFamily: 'Minecraft',
-                  shadows: [Shadow(offset: Offset(2.4, 2.4), blurRadius: 0, color: Color.fromRGBO(63, 63, 63, 1))]
+                  shadows: [
+                    Shadow(
+                      offset: Offset(2.4, 2.4),
+                      blurRadius: 0,
+                      color: Color.fromRGBO(63, 63, 63, 1),
+                    ),
+                  ],
                 ),
               ),
             ],
