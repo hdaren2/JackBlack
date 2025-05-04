@@ -70,7 +70,7 @@ class _GamePageState extends State<GamePage> {
       dealer.add(shoe.deal());
       // Check for immediate blackjack
       if (curHand.sum == 21) {
-        _gameResult = "Blackjack! You win.";
+        curHand.handResult = "Blackjack! You win!";
         player.funds += (initialBet * 1.5);
         isPlayerTurn = false;
         roundOver = true;
@@ -90,28 +90,33 @@ class _GamePageState extends State<GamePage> {
     _startGame();
   }
 
+  void checkHandVsDealer(Hand h){
+    int playerScore = h.sum;
+    int dealerScore = dealer.sum;
+    setState(() {
+      if(playerScore <= 21) {
+        if (dealerScore > 21) {
+          h.handResult = "Dealer busted with $dealerScore! You win!";
+          player.funds += (2 * curHand.bet);
+        } else if (playerScore > dealerScore) {
+          h.handResult = "You win! $playerScore vs $dealerScore";
+          player.funds += 2 * curHand.bet;
+        } else if (playerScore < dealerScore) {
+          h.handResult = "Dealer wins! $dealerScore vs $playerScore";
+        } else if (playerScore == dealerScore) {
+          h.handResult = "It's a tie! $playerScore vs $playerScore";
+          player.funds += curHand.bet;
+        }
+      }
+    });
+  }
+
   void _checkResult() {
     setState(() {
-      int playerScore = curHand.sum;
-      int dealerScore = dealer.sum;
-
-      if (playerScore > 21 && dealerScore > 21) {
-        _gameResult = "You both bust! $playerScore vs $dealerScore";
-      } else if (playerScore > 21) {
-        _gameResult = "You busted with $playerScore! Dealer wins.";
-      } else if (dealerScore > 21) {
-        _gameResult = "Dealer busted with $dealerScore! You win!";
-        player.funds += 2 * curHand.bet;
-      } else if (playerScore > dealerScore) {
-        _gameResult = "You win! $playerScore vs $dealerScore";
-        player.funds += 2 * curHand.bet;
-      } else if (playerScore < dealerScore) {
-        _gameResult = "Dealer wins! $dealerScore vs $playerScore";
-      } else {
-        _gameResult = "It's a tie! $playerScore vs $playerScore";
-        player.funds += curHand.bet;
-      }
       roundOver = true;
+      for (Hand h in player.hands){
+        checkHandVsDealer(h); 
+      }
     });
   }
 
@@ -120,7 +125,7 @@ class _GamePageState extends State<GamePage> {
       player.hit(curHand, shoe);
       int playerScore = curHand.sum;
       if (playerScore > 21) {
-        _gameResult = "You busted with $playerScore! Dealer wins.";
+        curHand.handResult = "You busted with $playerScore! Dealer wins.";
         nextHand();
       }
       else if (playerScore == 21) {
@@ -188,6 +193,7 @@ class _GamePageState extends State<GamePage> {
 
   void resetInitialBet() {
     setState(() {
+      player.funds += initialBet;
       initialBet = 0;
       betMessage = "";
     });
@@ -507,15 +513,41 @@ class _GamePageState extends State<GamePage> {
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(_gameResult,
-            style: TextStyle(
-              fontSize: 19,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-              fontFamily: 'Minecraft',
-              shadows: [Shadow(offset: Offset(3, 2.7), blurRadius: 0, color: Color.fromRGBO(63, 63, 63, 1))]
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              SizedBox(width: 12),
+              ... List.generate(player.hands.length * 2 - 1, (index) {
+                if (index % 2 == 0) {
+                  return Flexible(
+                    child: Text(player.hands[index ~/ 2].handResult,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                              fontFamily: 'Minecraft',
+                              shadows: [Shadow(offset: Offset(3, 2.7), blurRadius: 0, color: Color.fromRGBO(63, 63, 63, 1))]
+                            ),
+                          ),
+                  );
+                } else {
+                  return SizedBox(width: 24);
+                }
+              }),
+              SizedBox(width: 12),
+            ]
           ),
+          // Text(_gameResult,
+          //   style: TextStyle(
+          //     fontSize: 19,
+          //     fontWeight: FontWeight.bold,
+          //     color: Colors.white,
+          //     fontFamily: 'Minecraft',
+          //     shadows: [Shadow(offset: Offset(3, 2.7), blurRadius: 0, color: Color.fromRGBO(63, 63, 63, 1))]
+          //   ),
+          // ),
           SizedBox(height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,

@@ -53,4 +53,5 @@ class Hand extends DealerHand {
   bool isSurrendered = false;
   double bet = 0.0;
   double insurance = 0.0;
+  String handResult = "";
 }
