@@ -21,7 +21,7 @@ class _GamePageState extends State<GamePage> {
   bool showBetPrompt = true;
   bool showQuitPrompt = false;
   String _gameResult = "";
-  double bet = 0;
+  double initialBet = 0;
   double funds = 1000;
   String betMessage = "";
   bool roundOver = false;
@@ -48,19 +48,19 @@ class _GamePageState extends State<GamePage> {
     });
   }
 
-  void _startGame() {
+  void resetGame(){
     setState(() {
-      // Reset everything
       player.hands.clear();
       curHandIndex = 0;
       isPlayerTurn = true;
       roundOver = false;
       dealer.clear();
       _gameResult = "";
-      // Add a new empty hand to start with
-      player.addEmptyHand();
-      curHand.bet = bet;
-      bet = 0;
+    });
+  }
+
+  void dealFirstCards(){
+    setState(() {
       // Deal two cards to player
       curHand.add(shoe.deal());
       curHand.add(shoe.deal());
@@ -70,11 +70,17 @@ class _GamePageState extends State<GamePage> {
       // Check for immediate blackjack
       if (curHand.sum == 21) {
         _gameResult = "Blackjack! You win.";
-        player.funds += (curHand.bet * 3 / 2);
+        player.funds += (curHand.bet * 1.5);
         isPlayerTurn = false;
         roundOver = true;
       }
     });
+  }
+
+  void _startGame(){
+    resetGame();
+    player.addEmptyHand();
+    dealFirstCards();
   }
 
   @override
@@ -127,17 +133,19 @@ class _GamePageState extends State<GamePage> {
   }
 
   void _surrender() {
-    // Discard bet and hand
+    player.surrender(curHand);
     nextHand();
   }
 
   // Fix functionality
   void _doubleDown() {
-    setState(() {
-      if (curHand.sum <= 11) player.doubleDown(curHand);
-    });
-    // Check sum
-    nextHand();
+      if (curHand.sum <= 11 && curHand.length == 2) {
+        setState(() {
+          player.doubleDown(curHand);
+          curHand.add(shoe.deal());
+        });
+        nextHand();
+      }
   }
 
   void _insurance() {
@@ -155,34 +163,38 @@ class _GamePageState extends State<GamePage> {
   void _split() {
     setState(() {
       int handLength = curHand.hand.length;
-      if (handLength == 2) {
-        int c1 = curHand.hand[0].value;
-        int c2 = curHand.hand[1].value;
-        if (c1 == c2) {
-          player.split(curHand);
-          //_gameMessage = "You split the hand, play your first hand first";
-        }
+      //max splitting twice into three hands, 
+      //gets too unwiedly after that and most casinos do 4 hands so its close enough
+      if (handLength == 2 && curHand.hand[0].value == curHand.hand[1].value && player.hands.length <= 3) {
+        player.split(curHand);
       }
     });
   }
 
-  void _addToBet(double amount) {
+  void addToInitialBet(double amount) {
     setState(() {
-      bet += amount;
-      funds -= bet;
+      initialBet += amount;
+      player.funds -= amount;
     });
   }
 
-  void _resetBet() {
+  void subFromInitialBet(double amount){
     setState(() {
-      bet = 0;
+      initialBet -= amount;
+      player.funds += amount;
+    });
+  }
+
+  void resetInitialBet() {
+    setState(() {
+      initialBet = 0;
       betMessage = "";
     });
   }
 
-  void _confirmBet() {
+  void confirmInitialBet() {
     setState(() {
-      if (bet == 0) {
+      if (initialBet == 0) {
         betMessage = "Bet must be more than 0.";
         Future.delayed(const Duration(seconds: 2), () {
           setState(() {
@@ -190,7 +202,7 @@ class _GamePageState extends State<GamePage> {
           });
         });
       }
-      else if (bet > player.funds) {
+      else if (initialBet > player.funds) {
         betMessage = "Insufficient funds.";
         Future.delayed(const Duration(seconds: 2), () {
           setState(() {
@@ -199,10 +211,11 @@ class _GamePageState extends State<GamePage> {
         });
       }
       else {
-        player.bet(curHand, bet);
+        _startGame();
+        curHand.bet = initialBet;
+        initialBet = 0;
         betMessage = "";
         showBetPrompt = false;
-        _startGame();
       }
     });
   }
@@ -259,7 +272,7 @@ class _GamePageState extends State<GamePage> {
                 CustomButton(
                   text: "\$$value",
                   onPressed: () {
-                    _addToBet(value.toDouble());
+                    addToInitialBet(value.toDouble());
                   }
                 ),
               ],
@@ -273,7 +286,7 @@ class _GamePageState extends State<GamePage> {
                 CustomButton(
                   text: "\$$value",
                   onPressed: () {
-                    _addToBet(value.toDouble());
+                    addToInitialBet(value.toDouble());
                   }
                 ),
               ],
@@ -302,7 +315,7 @@ class _GamePageState extends State<GamePage> {
                 ],
               ),
                 SizedBox(width: 20),
-                Text("Bet: \$$bet",
+                Text("Bet: \$$initialBet",
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -346,12 +359,12 @@ class _GamePageState extends State<GamePage> {
           ),
           SizedBox(height: 25),
           Text("Player",  style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-            fontFamily: 'Minecraft',
-            shadows: [Shadow(offset:Offset(2.4, 2.4), blurRadius: 0, color: Color.fromRGBO(63, 63, 63, 1))]
-          ),
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+              fontFamily: 'Minecraft',
+              shadows: [Shadow(offset:Offset(2.4, 2.4), blurRadius: 0, color: Color.fromRGBO(63, 63, 63, 1))]
+            ),
           ),
           SizedBox(height: 10),
           Container(
@@ -398,14 +411,14 @@ class _GamePageState extends State<GamePage> {
               CustomButton(
                 text: "Reset Bet",
                 onPressed: () {
-                  _resetBet();
+                  resetInitialBet();
                 }
               ),
               SizedBox(width: 20),
               CustomButton(
                 text: "Confirm Bet",
                 onPressed: () {
-                  _confirmBet();
+                  confirmInitialBet();
                 }
               )
             ],
@@ -603,7 +616,7 @@ class _GamePageState extends State<GamePage> {
                   ),
                 ],
               ),
-              Text("Bet: \$${curHand.bet}",
+              Text(roundOver ? "" : "Bet: \$${curHand.bet}",
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
