@@ -34,7 +34,8 @@ class Player {
 
   void surrender(Hand h){
     h.isSurrendered = true;
-    // Get back half the bet?
+    // Get back half the bet
+    funds += (h.bet/2);
     h.bet = 0;
   }
 

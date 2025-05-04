@@ -4,6 +4,7 @@ import 'package:jackblack/shoe.dart';
 import 'package:jackblack/hand.dart';
 import 'package:jackblack/player.dart';
 import 'package:jackblack/widgets/custom_button.dart';
+import 'package:jackblack/widgets/show_hands.dart';
 
 class GamePage extends StatefulWidget {
   const GamePage({super.key});
@@ -70,7 +71,7 @@ class _GamePageState extends State<GamePage> {
       // Check for immediate blackjack
       if (curHand.sum == 21) {
         _gameResult = "Blackjack! You win.";
-        player.funds += (curHand.bet * 1.5);
+        player.funds += (initialBet * 1.5);
         isPlayerTurn = false;
         roundOver = true;
       }
@@ -373,25 +374,54 @@ class _GamePageState extends State<GamePage> {
               color: Color.fromRGBO(23, 107, 61, 1),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: curHand.hand.map((card) {
-                //final cardCount = curHand.hand.length;
-                final cardWidth = curHand.hand.length > 3 ? 85.0 : 120.0;
-                return PlayingCardWidget(card: card, width: cardWidth);
-              }).toList()
+            child: MultiHandCardRow(
+              maxWidth: (MediaQuery.sizeOf(context).width - 12 * 2),
+              Hands: player.hands.map((group) {
+                return group.hand.map((card) {
+                  return PlayingCardWidget(card: card);
+                }).toList();
+              }).toList(),
             ),
+            // Wrap(
+            //   spacing: 8,
+            //   runSpacing: 8,
+            //   children: curHand.hand.map((card) {
+            //     //final cardCount = curHand.hand.length;
+            //     final cardWidth = curHand.hand.length > 3 ? 85.0 : 120.0;
+            //     return PlayingCardWidget(card: card, width: cardWidth);
+            //   }).toList()
+            // ),
           ),
           SizedBox(height: 10),
-          Text("Sum: ${curHand.sum}",
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-              fontFamily: 'Minecraft',
-              shadows: [Shadow(offset: Offset(2.4, 2.4), blurRadius: 0, color: Color.fromRGBO(63, 63, 63, 1))]
-            ),
+          // Text("Sum: ${curHand.sum}",
+          //   style: TextStyle(
+          //     fontSize: 14,
+          //     fontWeight: FontWeight.bold,
+          //     color: Colors.white,
+          //     fontFamily: 'Minecraft',
+          //     shadows: [Shadow(offset: Offset(2.4, 2.4), blurRadius: 0, color: Color.fromRGBO(63, 63, 63, 1))]
+          //   ),
+          // ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: List.generate(player.hands.length * 2 - 1, (index) {
+              if (index % 2 == 0) {
+                return Flexible(
+                  child: Text("Sum: ${player.hands[index ~/ 2].sum}",
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                            fontFamily: 'Minecraft',
+                            shadows: [Shadow(offset: Offset(3, 2.7), blurRadius: 0, color: Color.fromRGBO(63, 63, 63, 1))]
+                          ),
+                        ),
+                );
+              } else {
+                return SizedBox(width: 24);
+              }
+            })
           ),
         ],
       ),
@@ -632,3 +662,4 @@ class _GamePageState extends State<GamePage> {
     );
   }
 }
+

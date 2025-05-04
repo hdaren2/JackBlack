@@ -27,6 +27,10 @@ class DealerHand {
     return sum;
   }
 
+  int get length {
+    return hand.length;
+  }
+
   void add(PlayingCard c){
     hand.add(c);
   }
