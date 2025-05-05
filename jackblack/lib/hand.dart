@@ -27,6 +27,10 @@ class DealerHand {
     return sum;
   }
 
+  int get length {
+    return hand.length;
+  }
+
   void add(PlayingCard c){
     hand.add(c);
   }
@@ -49,4 +53,5 @@ class Hand extends DealerHand {
   bool isSurrendered = false;
   double bet = 0.0;
   double insurance = 0.0;
+  String handResult = "";
 }

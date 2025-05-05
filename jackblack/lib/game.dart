@@ -4,6 +4,7 @@ import 'package:jackblack/shoe.dart';
 import 'package:jackblack/hand.dart';
 import 'package:jackblack/player.dart';
 import 'package:jackblack/widgets/custom_button.dart';
+import 'package:jackblack/widgets/show_hands.dart';
 
 class GamePage extends StatefulWidget {
   const GamePage({super.key});
@@ -21,7 +22,7 @@ class _GamePageState extends State<GamePage> {
   bool showBetPrompt = true;
   bool showQuitPrompt = false;
   String _gameResult = "";
-  double bet = 0;
+  double initialBet = 0;
   double funds = 1000;
   String betMessage = "";
   bool roundOver = false;
@@ -48,19 +49,19 @@ class _GamePageState extends State<GamePage> {
     });
   }
 
-  void _startGame() {
+  void resetGame(){
     setState(() {
-      // Reset everything
       player.hands.clear();
       curHandIndex = 0;
       isPlayerTurn = true;
       roundOver = false;
       dealer.clear();
       _gameResult = "";
-      // Add a new empty hand to start with
-      player.addEmptyHand();
-      curHand.bet = bet;
-      bet = 0;
+    });
+  }
+
+  void dealFirstCards(){
+    setState(() {
       // Deal two cards to player
       curHand.add(shoe.deal());
       curHand.add(shoe.deal());
@@ -69,12 +70,18 @@ class _GamePageState extends State<GamePage> {
       dealer.add(shoe.deal());
       // Check for immediate blackjack
       if (curHand.sum == 21) {
-        _gameResult = "Blackjack! You win.";
-        player.funds += (curHand.bet * 3 / 2);
+        curHand.handResult = "Blackjack! You win!";
+        player.funds += (initialBet * 1.5);
         isPlayerTurn = false;
         roundOver = true;
       }
     });
+  }
+
+  void _startGame(){
+    resetGame();
+    player.addEmptyHand();
+    dealFirstCards();
   }
 
   @override
@@ -83,28 +90,33 @@ class _GamePageState extends State<GamePage> {
     _startGame();
   }
 
+  void checkHandVsDealer(Hand h){
+    int playerScore = h.sum;
+    int dealerScore = dealer.sum;
+    setState(() {
+      if(playerScore <= 21) {
+        if (dealerScore > 21) {
+          h.handResult = "Dealer busted with $dealerScore! You win!";
+          player.funds += (2 * curHand.bet);
+        } else if (playerScore > dealerScore) {
+          h.handResult = "You win! $playerScore vs $dealerScore";
+          player.funds += 2 * curHand.bet;
+        } else if (playerScore < dealerScore) {
+          h.handResult = "Dealer wins! $dealerScore vs $playerScore";
+        } else if (playerScore == dealerScore) {
+          h.handResult = "It's a tie! $playerScore vs $playerScore";
+          player.funds += curHand.bet;
+        }
+      }
+    });
+  }
+
   void _checkResult() {
     setState(() {
-      int playerScore = curHand.sum;
-      int dealerScore = dealer.sum;
-
-      if (playerScore > 21 && dealerScore > 21) {
-        _gameResult = "You both bust! $playerScore vs $dealerScore";
-      } else if (playerScore > 21) {
-        _gameResult = "You busted with $playerScore! Dealer wins.";
-      } else if (dealerScore > 21) {
-        _gameResult = "Dealer busted with $dealerScore! You win!";
-        player.funds += 2 * curHand.bet;
-      } else if (playerScore > dealerScore) {
-        _gameResult = "You win! $playerScore vs $dealerScore";
-        player.funds += 2 * curHand.bet;
-      } else if (playerScore < dealerScore) {
-        _gameResult = "Dealer wins! $dealerScore vs $playerScore";
-      } else {
-        _gameResult = "It's a tie! $playerScore vs $playerScore";
-        player.funds += curHand.bet;
-      }
       roundOver = true;
+      for (Hand h in player.hands){
+        checkHandVsDealer(h); 
+      }
     });
   }
 
@@ -113,7 +125,7 @@ class _GamePageState extends State<GamePage> {
       player.hit(curHand, shoe);
       int playerScore = curHand.sum;
       if (playerScore > 21) {
-        _gameResult = "You busted with $playerScore! Dealer wins.";
+        curHand.handResult = "You busted with $playerScore! Dealer wins.";
         nextHand();
       } else if (playerScore == 21) {
         nextHand();
@@ -126,17 +138,19 @@ class _GamePageState extends State<GamePage> {
   }
 
   void _surrender() {
-    // Discard bet and hand
+    player.surrender(curHand);
     nextHand();
   }
 
   // Fix functionality
   void _doubleDown() {
-    setState(() {
-      if (curHand.sum <= 11) player.doubleDown(curHand);
-    });
-    // Check sum
-    nextHand();
+      if (curHand.sum <= 11 && curHand.length == 2) {
+        setState(() {
+          player.doubleDown(curHand);
+          curHand.add(shoe.deal());
+        });
+        nextHand();
+      }
   }
 
   void _insurance() {
@@ -154,52 +168,60 @@ class _GamePageState extends State<GamePage> {
   void _split() {
     setState(() {
       int handLength = curHand.hand.length;
-      if (handLength == 2) {
-        int c1 = curHand.hand[0].value;
-        int c2 = curHand.hand[1].value;
-        if (c1 == c2) {
-          player.split(curHand);
-          //_gameMessage = "You split the hand, play your first hand first";
-        }
+      //max splitting twice into three hands, 
+      //gets too unwiedly after that and most casinos do 4 hands so its close enough
+      if (handLength == 2 && curHand.hand[0].value == curHand.hand[1].value && player.hands.length <= 3) {
+        player.split(curHand);
       }
     });
   }
 
-  void _addToBet(double amount) {
+  void addToInitialBet(double amount) {
     setState(() {
-      bet += amount;
-      funds -= bet;
+      initialBet += amount;
+      player.funds -= amount;
     });
   }
 
-  void _resetBet() {
+  void subFromInitialBet(double amount){
     setState(() {
-      bet = 0;
+      initialBet -= amount;
+      player.funds += amount;
+    });
+  }
+
+  void resetInitialBet() {
+    setState(() {
+      player.funds += initialBet;
+      initialBet = 0;
       betMessage = "";
     });
   }
 
-  void _confirmBet() {
+  void confirmInitialBet() {
     setState(() {
-      if (bet == 0) {
+      if (initialBet == 0) {
         betMessage = "Bet must be more than 0.";
         Future.delayed(const Duration(seconds: 2), () {
           setState(() {
             betMessage = "";
           });
         });
-      } else if (bet > player.funds) {
+      }
+      else if (initialBet > player.funds) {
         betMessage = "Insufficient funds.";
         Future.delayed(const Duration(seconds: 2), () {
           setState(() {
             betMessage = "";
           });
         });
-      } else {
-        player.bet(curHand, bet);
+      }
+      else {
+        _startGame();
+        curHand.bet = initialBet;
+        initialBet = 0;
         betMessage = "";
         showBetPrompt = false;
-        _startGame();
       }
     });
   }
@@ -260,12 +282,12 @@ class _GamePageState extends State<GamePage> {
               spacing: 15,
               children: [
                 for (var value in [1, 5, 10])
-                  CustomButton(
-                    text: "\$$value",
-                    onPressed: () {
-                      _addToBet(value.toDouble());
-                    },
-                  ),
+                CustomButton(
+                  text: "\$$value",
+                  onPressed: () {
+                    addToInitialBet(value.toDouble());
+                  }
+                ),
               ],
             ),
             SizedBox(height: 15),
@@ -274,12 +296,12 @@ class _GamePageState extends State<GamePage> {
               spacing: 15,
               children: [
                 for (var value in [25, 50, 100])
-                  CustomButton(
-                    text: "\$$value",
-                    onPressed: () {
-                      _addToBet(value.toDouble());
-                    },
-                  ),
+                CustomButton(
+                  text: "\$$value",
+                  onPressed: () {
+                    addToInitialBet(value.toDouble());
+                  }
+                ),
               ],
             ),
             SizedBox(height: 20),
@@ -313,21 +335,14 @@ class _GamePageState extends State<GamePage> {
                   ],
                 ),
                 SizedBox(width: 20),
-                Text(
-                  "Bet: \$$bet",
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                    fontFamily: 'Minecraft',
-                    shadows: [
-                      Shadow(
-                        offset: Offset(2.9, 3.1),
-                        blurRadius: 0,
-                        color: Color.fromRGBO(63, 63, 63, 1),
-                      ),
-                    ],
-                  ),
+                Text("Bet: \$$initialBet",
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  fontFamily: 'Minecraft',
+                  shadows: [Shadow(offset: Offset(2.9,3.1), blurRadius: 0, color: Color.fromRGBO(63,63,63,1))]
+                ),
                 ),
               ],
             ),
@@ -377,20 +392,12 @@ class _GamePageState extends State<GamePage> {
             }),
           ),
           SizedBox(height: 25),
-          Text(
-            "Player",
-            style: TextStyle(
+          Text("Player",  style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.bold,
               color: Colors.white,
               fontFamily: 'Minecraft',
-              shadows: [
-                Shadow(
-                  offset: Offset(2.4, 2.4),
-                  blurRadius: 0,
-                  color: Color.fromRGBO(63, 63, 63, 1),
-                ),
-              ],
+              shadows: [Shadow(offset:Offset(2.4, 2.4), blurRadius: 0, color: Color.fromRGBO(63, 63, 63, 1))]
             ),
           ),
           SizedBox(height: 10),
@@ -400,33 +407,54 @@ class _GamePageState extends State<GamePage> {
               color: Color.fromRGBO(23, 107, 61, 1),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children:
-                  curHand.hand.map((card) {
-                    //final cardCount = curHand.hand.length;
-                    final cardWidth = curHand.hand.length > 3 ? 85.0 : 120.0;
-                    return PlayingCardWidget(card: card, width: cardWidth);
-                  }).toList(),
+            child: MultiHandCardRow(
+              maxWidth: (MediaQuery.sizeOf(context).width - 12 * 2),
+              Hands: player.hands.map((group) {
+                return group.hand.map((card) {
+                  return PlayingCardWidget(card: card);
+                }).toList();
+              }).toList(),
             ),
+            // Wrap(
+            //   spacing: 8,
+            //   runSpacing: 8,
+            //   children: curHand.hand.map((card) {
+            //     //final cardCount = curHand.hand.length;
+            //     final cardWidth = curHand.hand.length > 3 ? 85.0 : 120.0;
+            //     return PlayingCardWidget(card: card, width: cardWidth);
+            //   }).toList()
+            // ),
           ),
           SizedBox(height: 10),
-          Text(
-            "Sum: ${curHand.sum}",
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-              fontFamily: 'Minecraft',
-              shadows: [
-                Shadow(
-                  offset: Offset(2.4, 2.4),
-                  blurRadius: 0,
-                  color: Color.fromRGBO(63, 63, 63, 1),
-                ),
-              ],
-            ),
+          // Text("Sum: ${curHand.sum}",
+          //   style: TextStyle(
+          //     fontSize: 14,
+          //     fontWeight: FontWeight.bold,
+          //     color: Colors.white,
+          //     fontFamily: 'Minecraft',
+          //     shadows: [Shadow(offset: Offset(2.4, 2.4), blurRadius: 0, color: Color.fromRGBO(63, 63, 63, 1))]
+          //   ),
+          // ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: List.generate(player.hands.length * 2 - 1, (index) {
+              if (index % 2 == 0) {
+                return Flexible(
+                  child: Text("Sum: ${player.hands[index ~/ 2].sum}",
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                            fontFamily: 'Minecraft',
+                            shadows: [Shadow(offset: Offset(3, 2.7), blurRadius: 0, color: Color.fromRGBO(63, 63, 63, 1))]
+                          ),
+                        ),
+                );
+              } else {
+                return SizedBox(width: 24);
+              }
+            })
           ),
         ],
       ),
@@ -446,16 +474,16 @@ class _GamePageState extends State<GamePage> {
               CustomButton(
                 text: "Reset Bet",
                 onPressed: () {
-                  _resetBet();
-                },
+                  resetInitialBet();
+                }
               ),
               SizedBox(width: 20),
               CustomButton(
                 text: "Confirm Bet",
                 onPressed: () {
-                  _confirmBet();
-                },
-              ),
+                  confirmInitialBet();
+                }
+              )
             ],
           ),
           SizedBox(height: 20),
@@ -519,22 +547,41 @@ class _GamePageState extends State<GamePage> {
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(
-            _gameResult,
-            style: TextStyle(
-              fontSize: 19,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-              fontFamily: 'Minecraft',
-              shadows: [
-                Shadow(
-                  offset: Offset(3, 2.7),
-                  blurRadius: 0,
-                  color: Color.fromRGBO(63, 63, 63, 1),
-                ),
-              ],
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              SizedBox(width: 12),
+              ... List.generate(player.hands.length * 2 - 1, (index) {
+                if (index % 2 == 0) {
+                  return Flexible(
+                    child: Text(player.hands[index ~/ 2].handResult,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                              fontFamily: 'Minecraft',
+                              shadows: [Shadow(offset: Offset(3, 2.7), blurRadius: 0, color: Color.fromRGBO(63, 63, 63, 1))]
+                            ),
+                          ),
+                  );
+                } else {
+                  return SizedBox(width: 24);
+                }
+              }),
+              SizedBox(width: 12),
+            ]
           ),
+          // Text(_gameResult,
+          //   style: TextStyle(
+          //     fontSize: 19,
+          //     fontWeight: FontWeight.bold,
+          //     color: Colors.white,
+          //     fontFamily: 'Minecraft',
+          //     shadows: [Shadow(offset: Offset(3, 2.7), blurRadius: 0, color: Color.fromRGBO(63, 63, 63, 1))]
+          //   ),
+          // ),
           SizedBox(height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -672,8 +719,7 @@ class _GamePageState extends State<GamePage> {
                   ),
                 ],
               ),
-              Text(
-                "Bet: \$${curHand.bet}",
+              Text(roundOver ? "" : "Bet: \$${curHand.bet}",
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
@@ -695,3 +741,4 @@ class _GamePageState extends State<GamePage> {
     );
   }
 }
+
