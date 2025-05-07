@@ -27,7 +27,6 @@ flutter:
   uses-material-design: true
   assets:
     - assets/
-    - assets/cards/
 
   fonts:
     - family: Arcade
