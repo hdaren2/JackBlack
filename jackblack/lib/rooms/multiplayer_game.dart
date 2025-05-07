@@ -174,7 +174,19 @@ class _MultiplayerGamePageState extends State<MultiplayerGamePage> {
         children: [
           Padding(
             padding: const EdgeInsets.all(16.0),
-            child: Text(_gameMessage),
+            child: Column(
+              children: [
+                Text(_gameMessage),
+                const SizedBox(height: 8),
+                Text(
+                  'Players: ${_roomService.getActivePlayerCount(widget.room.id)}/${widget.room.maxPlayers}',
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
           ),
           Expanded(
             child: ListView(
