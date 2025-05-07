@@ -4,7 +4,6 @@ import 'package:jackblack/shoe.dart';
 import 'package:jackblack/hand.dart';
 import 'package:jackblack/player.dart';
 import 'package:jackblack/widgets/custom_button.dart';
-import 'package:jackblack/widgets/show_hands.dart';
 
 class GamePage extends StatefulWidget {
   const GamePage({super.key});
@@ -16,18 +15,21 @@ class GamePage extends StatefulWidget {
 class _GamePageState extends State<GamePage> {
   final Shoe shoe = Shoe(6);
   final Player player = Player(name: "Player", funds: 1000.0);
+  final Player aiPlayer = Player(name: "AI", funds: 1000.0); // AI Player
   final DealerHand dealer = DealerHand();
   bool isPlayerTurn = true;
+  bool isAIPlayerTurn = false;
   int curHandIndex = 0;
   bool showBetPrompt = true;
   bool showQuitPrompt = false;
   String _gameResult = "";
-  double initialBet = 0;
+  double bet = 0;
   double funds = 1000;
   String betMessage = "";
   bool roundOver = false;
 
   Hand get curHand => player.hands[curHandIndex];
+  Hand get aiHand => aiPlayer.hands.first; // AI has only one hand currently
 
   void nextHand() {
     setState(() {
@@ -35,6 +37,7 @@ class _GamePageState extends State<GamePage> {
         curHandIndex++;
       } else {
         isPlayerTurn = false;
+        isAIPlayerTurn = true;
         _dealerPlay();
       }
     });
@@ -49,39 +52,40 @@ class _GamePageState extends State<GamePage> {
     });
   }
 
-  void resetGame(){
+  void _startGame() {
     setState(() {
+      // Reset everything
       player.hands.clear();
+      aiPlayer.hands.clear();
       curHandIndex = 0;
       isPlayerTurn = true;
+      isAIPlayerTurn = false;
       roundOver = false;
       dealer.clear();
       _gameResult = "";
-    });
-  }
-
-  void dealFirstCards(){
-    setState(() {
+      // Add a new empty hand to start with
+      player.addEmptyHand();
+      aiPlayer.addEmptyHand(); // Add hand for AI
+      curHand.bet = bet;
+      bet = 0;
       // Deal two cards to player
       curHand.add(shoe.deal());
       curHand.add(shoe.deal());
       // Deal two cards to dealer
       dealer.add(shoe.deal());
       dealer.add(shoe.deal());
+      // Deal two cards to AI
+      aiHand.add(shoe.deal());
+      aiHand.add(shoe.deal());
       // Check for immediate blackjack
       if (curHand.sum == 21) {
-        curHand.handResult = "Blackjack! You win!";
-        player.funds += (initialBet * 1.5);
+        _gameResult = "Blackjack! You win.";
+        player.funds += (curHand.bet * 3 / 2);
         isPlayerTurn = false;
+        isAIPlayerTurn = true;
         roundOver = true;
       }
     });
-  }
-
-  void _startGame(){
-    resetGame();
-    player.addEmptyHand();
-    dealFirstCards();
   }
 
   @override
@@ -90,33 +94,37 @@ class _GamePageState extends State<GamePage> {
     _startGame();
   }
 
-  void checkHandVsDealer(Hand h){
-    int playerScore = h.sum;
-    int dealerScore = dealer.sum;
-    setState(() {
-      if(playerScore <= 21) {
-        if (dealerScore > 21) {
-          h.handResult = "Dealer busted with $dealerScore! You win!";
-          player.funds += (2 * curHand.bet);
-        } else if (playerScore > dealerScore) {
-          h.handResult = "You win! $playerScore vs $dealerScore";
-          player.funds += 2 * curHand.bet;
-        } else if (playerScore < dealerScore) {
-          h.handResult = "Dealer wins! $dealerScore vs $playerScore";
-        } else if (playerScore == dealerScore) {
-          h.handResult = "It's a tie! $playerScore vs $playerScore";
-          player.funds += curHand.bet;
-        }
-      }
-    });
-  }
-
   void _checkResult() {
     setState(() {
-      roundOver = true;
-      for (Hand h in player.hands){
-        checkHandVsDealer(h); 
+      int playerScore = curHand.sum;
+      int dealerScore = dealer.sum;
+      int aiScore = aiHand.sum;
+
+      if (playerScore > 21 && dealerScore > 21 && aiScore > 21) {
+        _gameResult = "You both bust! $playerScore vs $dealerScore vs $aiScore";
+      } else if (playerScore > 21) {
+        _gameResult = "You busted with $playerScore! Dealer and AI win.";
+      } else if (dealerScore > 21) {
+        _gameResult = "Dealer busted with $dealerScore! You and AI win!";
+        player.funds += 2 * curHand.bet;
+        aiPlayer.funds += 2 * aiHand.bet;
+      } else if (aiScore > 21) {
+        _gameResult = "AI busted with $aiScore! You win!";
+        player.funds += 2 * curHand.bet;
+      } else if (playerScore > dealerScore && playerScore > aiScore) {
+        _gameResult = "You win! $playerScore vs $dealerScore vs $aiScore";
+        player.funds += 2 * curHand.bet;
+      } else if (dealerScore > playerScore && dealerScore > aiScore) {
+        _gameResult = "Dealer wins! $dealerScore vs $playerScore vs $aiScore";
+      } else if (aiScore > playerScore && aiScore > dealerScore) {
+        _gameResult = "AI wins! $aiScore vs $playerScore vs $dealerScore";
+        aiPlayer.funds += 2 * aiHand.bet;
+      } else {
+        _gameResult = "It's a tie! $playerScore vs $aiScore vs $dealerScore";
+        player.funds += curHand.bet;
+        aiPlayer.funds += aiHand.bet;
       }
+      roundOver = true;
     });
   }
 
@@ -125,9 +133,7 @@ class _GamePageState extends State<GamePage> {
       player.hit(curHand, shoe);
       int playerScore = curHand.sum;
       if (playerScore > 21) {
-        curHand.handResult = "You busted with $playerScore! Dealer wins.";
-        nextHand();
-      } else if (playerScore == 21) {
+        _gameResult = "You busted with $playerScore! Dealer wins.";
         nextHand();
       }
     });
@@ -138,19 +144,17 @@ class _GamePageState extends State<GamePage> {
   }
 
   void _surrender() {
-    player.surrender(curHand);
+    // Discard bet and hand
     nextHand();
   }
 
   // Fix functionality
   void _doubleDown() {
-      if (curHand.sum <= 11 && curHand.length == 2) {
-        setState(() {
-          player.doubleDown(curHand);
-          curHand.add(shoe.deal());
-        });
-        nextHand();
-      }
+    setState(() {
+      if (curHand.sum <= 11) player.doubleDown(curHand);
+    });
+    // Check sum
+    nextHand();
   }
 
   void _insurance() {
@@ -168,60 +172,52 @@ class _GamePageState extends State<GamePage> {
   void _split() {
     setState(() {
       int handLength = curHand.hand.length;
-      //max splitting twice into three hands, 
-      //gets too unwiedly after that and most casinos do 4 hands so its close enough
-      if (handLength == 2 && curHand.hand[0].value == curHand.hand[1].value && player.hands.length <= 3) {
-        player.split(curHand);
+      if (handLength == 2) {
+        int c1 = curHand.hand[0].value;
+        int c2 = curHand.hand[1].value;
+        if (c1 == c2) {
+          player.split(curHand);
+          //_gameMessage = "You split the hand, play your first hand first";
+        }
       }
     });
   }
 
-  void addToInitialBet(double amount) {
+  void _addToBet(double amount) {
     setState(() {
-      initialBet += amount;
-      player.funds -= amount;
+      bet += amount;
+      funds -= bet;
     });
   }
 
-  void subFromInitialBet(double amount){
+  void _resetBet() {
     setState(() {
-      initialBet -= amount;
-      player.funds += amount;
-    });
-  }
-
-  void resetInitialBet() {
-    setState(() {
-      player.funds += initialBet;
-      initialBet = 0;
+      bet = 0;
       betMessage = "";
     });
   }
 
-  void confirmInitialBet() {
+  void _confirmBet() {
     setState(() {
-      if (initialBet == 0) {
+      if (bet == 0) {
         betMessage = "Bet must be more than 0.";
         Future.delayed(const Duration(seconds: 2), () {
           setState(() {
             betMessage = "";
           });
         });
-      }
-      else if (initialBet > player.funds) {
+      } else if (bet > player.funds) {
         betMessage = "Insufficient funds.";
         Future.delayed(const Duration(seconds: 2), () {
           setState(() {
             betMessage = "";
           });
         });
-      }
-      else {
-        _startGame();
-        curHand.bet = initialBet;
-        initialBet = 0;
+      } else {
+        player.bet(curHand, bet);
         betMessage = "";
         showBetPrompt = false;
+        _startGame();
       }
     });
   }
@@ -260,34 +256,19 @@ class _GamePageState extends State<GamePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(
-              "Make a bet to start:",
-              style: TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-                fontFamily: 'Minecraft',
-                shadows: [
-                  Shadow(
-                    offset: Offset(3.9, 3.9),
-                    blurRadius: 0,
-                    color: Color.fromRGBO(63, 63, 63, 1),
-                  ),
-                ],
-              ),
-            ),
+            Text("Make a bet to start:"),
             SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               spacing: 15,
               children: [
                 for (var value in [1, 5, 10])
-                CustomButton(
-                  text: "\$$value",
-                  onPressed: () {
-                    addToInitialBet(value.toDouble());
-                  }
-                ),
+                  CustomButton(
+                    text: "\$$value",
+                    onPressed: () {
+                      _addToBet(value.toDouble());
+                    },
+                  ),
               ],
             ),
             SizedBox(height: 15),
@@ -296,53 +277,50 @@ class _GamePageState extends State<GamePage> {
               spacing: 15,
               children: [
                 for (var value in [25, 50, 100])
-                CustomButton(
-                  text: "\$$value",
-                  onPressed: () {
-                    addToInitialBet(value.toDouble());
-                  }
-                ),
+                  CustomButton(
+                    text: "\$$value",
+                    onPressed: () {
+                      _addToBet(value.toDouble());
+                    },
+                  ),
               ],
             ),
             SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Row(
-                  children: [
-                    Image.asset(
-                      'assets/Screenshot 2025-04-23 at 4.03.13 PM-1.png.png',
-                      width: 20,
-                      height: 20,
-                    ),
-                    SizedBox(width: 5),
-                    Text(
-                      "\$${player.funds}",
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                        fontFamily: 'Minecraft',
-                        shadows: [
-                          Shadow(
-                            offset: Offset(2.4, 2.4),
-                            blurRadius: 0,
-                            color: Color.fromRGBO(63, 63, 63, 1),
-                          ),
-                        ],
+                Text(
+                  "Funds: \$${player.funds}",
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    fontFamily: 'Minecraft',
+                    shadows: [
+                      Shadow(
+                        offset: Offset(2.9, 3.1),
+                        blurRadius: 0,
+                        color: Color.fromRGBO(63, 63, 63, 1),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
                 SizedBox(width: 20),
-                Text("Bet: \$$initialBet",
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                  fontFamily: 'Minecraft',
-                  shadows: [Shadow(offset: Offset(2.9,3.1), blurRadius: 0, color: Color.fromRGBO(63,63,63,1))]
-                ),
+                Text(
+                  "Bet: \$$bet",
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    fontFamily: 'Minecraft',
+                    shadows: [
+                      Shadow(
+                        offset: Offset(2.9, 3.1),
+                        blurRadius: 0,
+                        color: Color.fromRGBO(63, 63, 63, 1),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -392,12 +370,20 @@ class _GamePageState extends State<GamePage> {
             }),
           ),
           SizedBox(height: 25),
-          Text("Player",  style: TextStyle(
+          Text(
+            "Player",
+            style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.bold,
               color: Colors.white,
               fontFamily: 'Minecraft',
-              shadows: [Shadow(offset:Offset(2.4, 2.4), blurRadius: 0, color: Color.fromRGBO(63, 63, 63, 1))]
+              shadows: [
+                Shadow(
+                  offset: Offset(2.4, 2.4),
+                  blurRadius: 0,
+                  color: Color.fromRGBO(63, 63, 63, 1),
+                ),
+              ],
             ),
           ),
           SizedBox(height: 10),
@@ -407,54 +393,33 @@ class _GamePageState extends State<GamePage> {
               color: Color.fromRGBO(23, 107, 61, 1),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: MultiHandCardRow(
-              maxWidth: (MediaQuery.sizeOf(context).width - 12 * 2),
-              Hands: player.hands.map((group) {
-                return group.hand.map((card) {
-                  return PlayingCardWidget(card: card);
-                }).toList();
-              }).toList(),
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children:
+                  curHand.hand.map((card) {
+                    //final cardCount = curHand.hand.length;
+                    final cardWidth = curHand.hand.length > 3 ? 85.0 : 120.0;
+                    return PlayingCardWidget(card: card, width: cardWidth);
+                  }).toList(),
             ),
-            // Wrap(
-            //   spacing: 8,
-            //   runSpacing: 8,
-            //   children: curHand.hand.map((card) {
-            //     //final cardCount = curHand.hand.length;
-            //     final cardWidth = curHand.hand.length > 3 ? 85.0 : 120.0;
-            //     return PlayingCardWidget(card: card, width: cardWidth);
-            //   }).toList()
-            // ),
           ),
           SizedBox(height: 10),
-          // Text("Sum: ${curHand.sum}",
-          //   style: TextStyle(
-          //     fontSize: 14,
-          //     fontWeight: FontWeight.bold,
-          //     color: Colors.white,
-          //     fontFamily: 'Minecraft',
-          //     shadows: [Shadow(offset: Offset(2.4, 2.4), blurRadius: 0, color: Color.fromRGBO(63, 63, 63, 1))]
-          //   ),
-          // ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: List.generate(player.hands.length * 2 - 1, (index) {
-              if (index % 2 == 0) {
-                return Flexible(
-                  child: Text("Sum: ${player.hands[index ~/ 2].sum}",
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                            fontFamily: 'Minecraft',
-                            shadows: [Shadow(offset: Offset(3, 2.7), blurRadius: 0, color: Color.fromRGBO(63, 63, 63, 1))]
-                          ),
-                        ),
-                );
-              } else {
-                return SizedBox(width: 24);
-              }
-            })
+          Text(
+            "Sum: ${curHand.sum}",
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+              fontFamily: 'Minecraft',
+              shadows: [
+                Shadow(
+                  offset: Offset(2.4, 2.4),
+                  blurRadius: 0,
+                  color: Color.fromRGBO(63, 63, 63, 1),
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -474,16 +439,16 @@ class _GamePageState extends State<GamePage> {
               CustomButton(
                 text: "Reset Bet",
                 onPressed: () {
-                  resetInitialBet();
-                }
+                  _resetBet();
+                },
               ),
               SizedBox(width: 20),
               CustomButton(
                 text: "Confirm Bet",
                 onPressed: () {
-                  confirmInitialBet();
-                }
-              )
+                  _confirmBet();
+                },
+              ),
             ],
           ),
           SizedBox(height: 20),
@@ -547,41 +512,22 @@ class _GamePageState extends State<GamePage> {
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              SizedBox(width: 12),
-              ... List.generate(player.hands.length * 2 - 1, (index) {
-                if (index % 2 == 0) {
-                  return Flexible(
-                    child: Text(player.hands[index ~/ 2].handResult,
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                              fontFamily: 'Minecraft',
-                              shadows: [Shadow(offset: Offset(3, 2.7), blurRadius: 0, color: Color.fromRGBO(63, 63, 63, 1))]
-                            ),
-                          ),
-                  );
-                } else {
-                  return SizedBox(width: 24);
-                }
-              }),
-              SizedBox(width: 12),
-            ]
+          Text(
+            _gameResult,
+            style: TextStyle(
+              fontSize: 19,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+              fontFamily: 'Minecraft',
+              shadows: [
+                Shadow(
+                  offset: Offset(3, 2.7),
+                  blurRadius: 0,
+                  color: Color.fromRGBO(63, 63, 63, 1),
+                ),
+              ],
+            ),
           ),
-          // Text(_gameResult,
-          //   style: TextStyle(
-          //     fontSize: 19,
-          //     fontWeight: FontWeight.bold,
-          //     color: Colors.white,
-          //     fontFamily: 'Minecraft',
-          //     shadows: [Shadow(offset: Offset(3, 2.7), blurRadius: 0, color: Color.fromRGBO(63, 63, 63, 1))]
-          //   ),
-          // ),
           SizedBox(height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -693,33 +639,24 @@ class _GamePageState extends State<GamePage> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  Image.asset(
-                    'assets/Screenshot 2025-04-23 at 4.03.13 PM-1.png.png',
-                    width: 20,
-                    height: 20,
-                  ),
-                  SizedBox(width: 5),
-                  Text(
-                    "\$${player.funds}",
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                      fontFamily: 'Minecraft',
-                      shadows: [
-                        Shadow(
-                          offset: Offset(2.4, 2.4),
-                          blurRadius: 0,
-                          color: Color.fromRGBO(63, 63, 63, 1),
-                        ),
-                      ],
+              Text(
+                "Funds: \$${player.funds}",
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  fontFamily: 'Minecraft',
+                  shadows: [
+                    Shadow(
+                      offset: Offset(2.4, 2.4),
+                      blurRadius: 0,
+                      color: Color.fromRGBO(63, 63, 63, 1),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-              Text(roundOver ? "" : "Bet: \$${curHand.bet}",
+              Text(
+                "Bet: \$${curHand.bet}",
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
@@ -741,4 +678,3 @@ class _GamePageState extends State<GamePage> {
     );
   }
 }
-
