@@ -1,6 +1,5 @@
-import 'package:jackblack/card.dart';
-import 'package:jackblack/shoe.dart';
-import 'package:jackblack/hand.dart';
+import 'shoe.dart';
+import 'hand.dart';
 
 class Player {
   final String name;
@@ -8,55 +7,41 @@ class Player {
   List<Hand> hands = []; //multiple hands in case splitting
   //will add stats and way to keep track of them
 
-  Player({
-    required this.name,
-    required this.funds
-  });
 
-  double bet(Hand h, double bet){
-    funds -= bet;
-    h.bet += bet;
-    return bet;
-  }
-
-  void addEmptyHand(){
-    Hand h = Hand();
-    hands.add(h);
-  }
+  Player({required this.name, required this.funds}) ;
 
   void stand(Hand h){
     h.isStanding = true;
   }
 
   void hit(Hand h, Shoe d){
-    h.add(d.deal());
+    h.add(d.dealCard());
   }
 
   void surrender(Hand h){
     h.isSurrendered = true;
-    // Get back half the bet
-    funds += (h.bet/2);
     h.bet = 0;
   }
 
   void split(Hand h){
-    // First two cards must have same value
-    PlayingCard two = h.hand.removeLast();
+    //first two cards must have same value
+    Card two = h.hand.removeLast();
     Hand second = Hand();
-    bet(second, h.bet);
     second.add(two);
     hands.add(second);
   }
 
   void doubleDown(Hand h){
-    // Must be on first two cards
-    bet(h, h.bet);
+    //must be on first two cards
+    funds-=h.bet;
+    h.bet+=h.bet;
   }
 
   void insurance(Hand h){
-    // If dealer's upcard is ace
+    //if dealers upcard is ace
     double insurance = h.bet/2;
-    funds -= insurance;
-    h.insurance += insurance;
+    funds-=insurance;
+    h.insurance+=insurance;
   }
+
 }

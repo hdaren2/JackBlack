@@ -1,22 +1,16 @@
-import 'package:jackblack/card.dart';
+import 'shoe.dart';
 
 class DealerHand {
-  final List<PlayingCard> hand = [];
+  final List<Card> hand = [];
   bool isStanding = false;
   bool isBusted = false;
 
-  int get sum {
+  int sum() {
     int sum = 0;
     int aceCount = 0;
 
-    for (PlayingCard c in hand) {
-      // Update PlayingCard class to have value to simplify this loop
-      /*if (c.rank == 'A') {
-        aceCount++;
-      }*/
-      //sum += c.value;
-      var rank = c.rank;
-      if (rank == 'A')
+    for (Card c in hand) {
+      if(c.rank=='A')
         aceCount++;
       sum += c.value;
     }
@@ -27,11 +21,7 @@ class DealerHand {
     return sum;
   }
 
-  int get length {
-    return hand.length;
-  }
-
-  void add(PlayingCard c){
+  void add(Card c){
     hand.add(c);
   }
 
@@ -42,7 +32,7 @@ class DealerHand {
 
   String toString(){
     String cards = "";
-    for(PlayingCard c in hand){
+    for(Card c in hand){
       cards += "${c.rank} ${c.suit}";
     }
     return cards;
@@ -53,5 +43,4 @@ class Hand extends DealerHand {
   bool isSurrendered = false;
   double bet = 0.0;
   double insurance = 0.0;
-  String handResult = "";
 }
