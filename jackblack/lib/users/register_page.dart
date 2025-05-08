@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:jackblack/titlepage.dart';
 import 'package:jackblack/widgets/custom_button.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import "package:jackblack/widgets/custom_textbox.dart";
 
 /* 
 
@@ -32,6 +33,10 @@ class _RegisterPageState extends State<RegisterPage> {
   final password = TextEditingController();
   final userName = TextEditingController();
   final anonName = TextEditingController();
+
+  // State to track which form to show
+  // null = show choice, 'signIn' = show sign in form, 'guest' = show guest form
+  String? _selectedOption;
 
   // Function to register user with their desired username
   void signUp() async {
@@ -90,36 +95,179 @@ class _RegisterPageState extends State<RegisterPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color.fromRGBO(33, 126, 75, 1),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text("Sign In or Create an Account to Save Your Money!"),
-            Text("Email"),
-            TextField(controller: email),
-            Text("Password"),
-            TextField(controller: password),
-            Text("Username"),
-            TextField(controller: userName),
-            SizedBox(height: 15),
-            CustomButton(
-              text: "Done",
-              onPressed: () {
-                signUp();
-              },
-            ),
-            Text("Or Continue as Guest"),
-            Text("Username"),
-            TextField(controller: anonName),
-            SizedBox(height: 15),
-            CustomButton(
-              text: "Done",
-              onPressed: () {
-                signUpAnonymous();
-              },
-            ),
-          ],
-        ),
+        child:
+            _selectedOption == null
+                ? Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "Jack Black Blackjack",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 40,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        fontFamily: 'Minecraft',
+                        shadows: [
+                          Shadow(
+                            offset: Offset(5, 5),
+                            blurRadius: 0,
+                            color: Color.fromRGBO(63, 63, 63, 1),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 36),
+                    Text(
+                      "Save Your Money with an Account!",
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        fontFamily: 'Minecraft',
+                        shadows: [
+                          Shadow(
+                            offset: Offset(2.4, 2.4),
+                            blurRadius: 0,
+                            color: Color.fromRGBO(63, 63, 63, 1),
+                          ),
+                        ],
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    SizedBox(height: 20),
+                    CustomButton(
+                      text: "Sign In/Create Account",
+                      fontSize: 18,
+                      onPressed: () {
+                        setState(() {
+                          _selectedOption = 'signIn';
+                        });
+                      },
+                    ),
+                    SizedBox(height: 12),
+                    CustomButton(
+                      text: "Continue as Guest",
+                      fontSize: 18,
+                      onPressed: () {
+                        setState(() {
+                          _selectedOption = 'guest';
+                        });
+                      },
+                    ),
+                  ],
+                )
+                : _selectedOption == 'signIn'
+                ? Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "Sign In or Create an Account to Save Your Money!",
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        fontFamily: 'Minecraft',
+                        shadows: [
+                          Shadow(
+                            offset: Offset(2.4, 2.4),
+                            blurRadius: 0,
+                            color: Color.fromRGBO(63, 63, 63, 1),
+                          ),
+                        ],
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    SizedBox(height: 20),
+                    CustomTextBox(
+                      controller: email,
+                      hintText: "Email",
+                      fontSize: 18,
+                      width: MediaQuery.of(context).size.width * 0.7,
+                    ),
+                    SizedBox(height: 10),
+                    CustomTextBox(
+                      controller: password,
+                      hintText: "Password",
+                      fontSize: 18,
+                      width: MediaQuery.of(context).size.width * 0.7,
+                    ),
+                    SizedBox(height: 10),
+                    CustomTextBox(
+                      controller: userName,
+                      hintText: "Username",
+                      fontSize: 18,
+                      width: MediaQuery.of(context).size.width * 0.7,
+                    ),
+                    SizedBox(height: 15),
+                    CustomButton(
+                      text: "Let's Gamble!",
+                      fontSize: 18,
+                      onPressed: () {
+                        signUp();
+                      },
+                    ),
+                    SizedBox(height: 10),
+                    CustomButton(
+                      text: "Back",
+                      fontSize: 16,
+                      onPressed: () {
+                        setState(() {
+                          _selectedOption = null;
+                        });
+                      },
+                    ),
+                  ],
+                )
+                : Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "Continue as Guest",
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        fontFamily: 'Minecraft',
+                        shadows: [
+                          Shadow(
+                            offset: Offset(2.4, 2.4),
+                            blurRadius: 0,
+                            color: Color.fromRGBO(63, 63, 63, 1),
+                          ),
+                        ],
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    SizedBox(height: 20),
+                    CustomTextBox(
+                      controller: anonName,
+                      hintText: "Username",
+                      fontSize: 18,
+                      width: MediaQuery.of(context).size.width * 0.7,
+                    ),
+                    SizedBox(height: 15),
+                    CustomButton(
+                      text: "Let's Gamble!",
+                      fontSize: 18,
+                      onPressed: () {
+                        signUpAnonymous();
+                      },
+                    ),
+                    SizedBox(height: 10),
+                    CustomButton(
+                      text: "Back",
+                      fontSize: 16,
+                      onPressed: () {
+                        setState(() {
+                          _selectedOption = null;
+                        });
+                      },
+                    ),
+                  ],
+                ),
       ),
     );
   }
