@@ -119,7 +119,26 @@ class _ModePageState extends State<ModePage> {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const GamePage()),
+                  PageRouteBuilder(
+                    pageBuilder:
+                        (context, animation, secondaryAnimation) =>
+                            const GamePage(),
+                    transitionsBuilder: (
+                      context,
+                      animation,
+                      secondaryAnimation,
+                      child,
+                    ) {
+                      final fadeAnimation = CurvedAnimation(
+                        parent: animation,
+                        curve: Curves.easeInOut,
+                      );
+                      return FadeTransition(
+                        opacity: fadeAnimation,
+                        child: child,
+                      );
+                    },
+                  ),
                 );
               },
             ),
@@ -130,9 +149,17 @@ class _ModePageState extends State<ModePage> {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => RoomSelectionPage(isHosting: true),
-                  ),
+                  PageRouteBuilder(
+          pageBuilder:
+              (context, animation, secondaryAnimation) => const RoomSelectionPage(isHosting: true),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            final fadeAnimation = CurvedAnimation(
+              parent: animation,
+              curve: Curves.easeInOut,
+            );
+            return FadeTransition(opacity: fadeAnimation, child: child);
+          },
+        ),
                 );
               },
             ),

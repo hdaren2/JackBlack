@@ -74,15 +74,25 @@ class _RegisterPageState extends State<RegisterPage> {
       return;
     }
 
-    //Attempt Login
+    // Attempt Login
     try {
       await authService.signInWithEmailPassword(emailTxt, passwordTxt);
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => TitlePage()),
+        PageRouteBuilder(
+          pageBuilder:
+              (context, animation, secondaryAnimation) => const TitlePage(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            final fadeAnimation = CurvedAnimation(
+              parent: animation,
+              curve: Curves.easeInOut,
+            );
+            return FadeTransition(opacity: fadeAnimation, child: child);
+          },
+        ),
       );
     }
-    //Catch Error
+    // Catch Error
     catch (e) {
       String msg = "";
       if (e.toString().contains("400")) {
@@ -130,15 +140,13 @@ class _RegisterPageState extends State<RegisterPage> {
       await authService.signUpWithEmailPassword(
         emailTxt,
         passwordTxt,
-        userNameTxt
+        userNameTxt,
       );
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => TitlePage()),
       );
-    } 
-    
-    catch (e) {
+    } catch (e) {
       String msg = "";
       if (e.toString().contains("register")) {
         msg = "User Already Registered";
@@ -185,16 +193,12 @@ class _RegisterPageState extends State<RegisterPage> {
       return;
     }
     try {
-      await authService.signUpAnonymous(
-        anonNameTxt
-      );
+      await authService.signUpAnonymous(anonNameTxt);
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => TitlePage()),
       );
-    } 
-    
-    catch (e) {
+    } catch (e) {
       print("Error: $e");
     }
   }
