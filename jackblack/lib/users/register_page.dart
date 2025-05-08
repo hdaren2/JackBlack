@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:jackblack/titlepage.dart';
+import 'package:jackblack/users/auth_service.dart';
 import 'package:jackblack/widgets/custom_button.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import "package:jackblack/widgets/custom_textbox.dart";
@@ -28,6 +29,9 @@ class _RegisterPageState extends State<RegisterPage> {
   // Get reference to database
   final supabase = Supabase.instance.client;
 
+  //Get Auth Service
+  final authService = AuthService();
+
   // Text controller to get what the user entered in the text field
   final email = TextEditingController();
   final password = TextEditingController();
@@ -38,14 +42,165 @@ class _RegisterPageState extends State<RegisterPage> {
   // null = show choice, 'signIn' = show sign in form, 'guest' = show guest form
   String? _selectedOption;
 
-  // Track if email is taken
-  bool _emailTaken = false;
-
   // Track if there was a caught error in signUp
   bool _signUpError = false;
 
+  // Track if user is in sign up mode
+  bool _showSignUpScreen = false;
+
+  // Track if 'Here!' button is pressed
+  bool _herePressed = false;
+
+  //Login With Email Password
+  void logIn() async {
+    final emailTxt = email.text;
+    final passwordTxt = password.text;
+
+    // Validate fields
+    final snackBarTextStyle = TextStyle(
+      fontFamily: 'Minecraft',
+      fontWeight: FontWeight.bold,
+      color: Colors.white,
+      fontSize: 16,
+    );
+    if (emailTxt.isEmpty || passwordTxt.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Please Fill in All Fields.', style: snackBarTextStyle),
+          backgroundColor: Colors.grey.shade900,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    //Attempt Login
+    try {
+      await authService.signInWithEmailPassword(emailTxt, passwordTxt);
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => TitlePage()),
+      );
+    }
+    //Catch Error
+    catch (e) {
+      String msg = "";
+      if (e.toString().contains("400")) {
+        msg = "Invalid Login Credentials";
+      }
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("$msg", style: snackBarTextStyle),
+            backgroundColor: Colors.grey.shade900,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
+  }
+
   // Function to register user with their desired username
   void signUp() async {
+    final emailTxt = email.text;
+    final passwordTxt = password.text;
+    final userNameTxt = userName.text;
+
+    // Validate fields
+    final snackBarTextStyle = TextStyle(
+      fontFamily: 'Minecraft',
+      fontWeight: FontWeight.bold,
+      color: Colors.white,
+      fontSize: 16,
+    );
+    if (emailTxt.isEmpty || passwordTxt.isEmpty || userNameTxt.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Please fill in all fields.', style: snackBarTextStyle),
+          backgroundColor: Colors.grey.shade900,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    //Attempt Login
+    try {
+      await authService.signUpWithEmailPassword(
+        emailTxt,
+        passwordTxt,
+        userNameTxt
+      );
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => TitlePage()),
+      );
+    } 
+    
+    catch (e) {
+      String msg = "";
+      if (e.toString().contains("register")) {
+        msg = "User Already Registered";
+      }
+
+      if (e.toString().contains("6 characters")) {
+        msg = "Password Must Contain More Than 6 Characters";
+      }
+
+      if (e.toString().contains("format")) {
+        msg = "Invalid Email Format (example@web.com)";
+      }
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("$msg", style: snackBarTextStyle),
+            backgroundColor: Colors.grey.shade900,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
+  }
+
+  void signUpAnonymous() async {
+    final anonNameTxt = anonName.text;
+
+    // Validate field
+    final snackBarTextStyle = TextStyle(
+      fontFamily: 'Minecraft',
+      fontWeight: FontWeight.bold,
+      color: Colors.white,
+      fontSize: 16,
+    );
+    if (anonNameTxt.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Please Enter a Username', style: snackBarTextStyle),
+          backgroundColor: Colors.grey.shade900,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+    try {
+      await authService.signUpAnonymous(
+        anonNameTxt
+      );
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => TitlePage()),
+      );
+    } 
+    
+    catch (e) {
+      print("Error: $e");
+    }
+  }
+
+  // Function to register user with their desired username
+  void signIn() async {
     // Validate fields
     final snackBarTextStyle = TextStyle(
       fontFamily: 'Minecraft',
@@ -64,45 +219,9 @@ class _RegisterPageState extends State<RegisterPage> {
       return;
     }
     try {
-      await Supabase.instance.client.auth.signUp(
+      Supabase.instance.client.auth.signInWithPassword(
         email: email.text,
         password: password.text,
-        data: {'username': userName.text},
-      );
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => TitlePage()),
-      );
-    } catch (e) {
-      setState(() {
-        _signUpError = true;
-      });
-      _showSignUpErrorSnackbar();
-      print("Error: $e");
-    }
-  }
-
-  void signUpAnonymous() async {
-    // Validate field
-    final snackBarTextStyle = TextStyle(
-      fontFamily: 'Minecraft',
-      fontWeight: FontWeight.bold,
-      color: Colors.white,
-      fontSize: 16,
-    );
-    if (anonName.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Please enter a username.', style: snackBarTextStyle),
-          backgroundColor: Colors.grey.shade900,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-      return;
-    }
-    try {
-      await Supabase.instance.client.auth.signInAnonymously(
-        data: {'username': anonName.text},
       );
       Navigator.push(
         context,
@@ -165,7 +284,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     ),
                     SizedBox(height: 20),
                     CustomButton(
-                      text: "Sign In/Create Account",
+                      text: "Log In/Create Account",
                       fontSize: 18,
                       onPressed: () {
                         setState(() {
@@ -186,67 +305,184 @@ class _RegisterPageState extends State<RegisterPage> {
                   ],
                 )
                 : _selectedOption == 'signIn'
-                ? Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      "Sign In or Create an Account to Save Your Money!",
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                        fontFamily: 'Minecraft',
-                        shadows: [
-                          Shadow(
-                            offset: Offset(2.4, 2.4),
-                            blurRadius: 0,
-                            color: Color.fromRGBO(63, 63, 63, 1),
+                ? (_showSignUpScreen
+                    ? Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          "Create an Account!",
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                            fontFamily: 'Minecraft',
+                            shadows: [
+                              Shadow(
+                                offset: Offset(2.4, 2.4),
+                                blurRadius: 0,
+                                color: Color.fromRGBO(63, 63, 63, 1),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    SizedBox(height: 20),
-                    CustomTextBox(
-                      controller: email,
-                      hintText: "Email",
-                      fontSize: 18,
-                      width: MediaQuery.of(context).size.width * 0.7,
-                    ),
-                    SizedBox(height: 10),
-                    CustomTextBox(
-                      controller: password,
-                      hintText: "Password",
-                      fontSize: 18,
-                      width: MediaQuery.of(context).size.width * 0.7,
-                    ),
-                    SizedBox(height: 10),
-                    CustomTextBox(
-                      controller: userName,
-                      hintText: "Username",
-                      fontSize: 18,
-                      width: MediaQuery.of(context).size.width * 0.7,
-                    ),
-                    SizedBox(height: 15),
-                    CustomButton(
-                      text: "Let's Gamble!",
-                      fontSize: 18,
-                      onPressed: () {
-                        signUp();
-                      },
-                    ),
-                    SizedBox(height: 10),
-                    CustomButton(
-                      text: "Back",
-                      fontSize: 16,
-                      onPressed: () {
-                        setState(() {
-                          _selectedOption = null;
-                        });
-                      },
-                    ),
-                  ],
-                )
+                          textAlign: TextAlign.center,
+                        ),
+                        SizedBox(height: 20),
+                        CustomTextBox(
+                          controller: email,
+                          hintText: "Email",
+                          fontSize: 18,
+                          width: MediaQuery.of(context).size.width * 0.7,
+                        ),
+                        SizedBox(height: 10),
+                        CustomTextBox(
+                          controller: password,
+                          hintText: "Password",
+                          fontSize: 18,
+                          width: MediaQuery.of(context).size.width * 0.7,
+                        ),
+                        SizedBox(height: 10),
+                        CustomTextBox(
+                          controller: userName,
+                          hintText: "Username",
+                          fontSize: 18,
+                          width: MediaQuery.of(context).size.width * 0.7,
+                        ),
+                        SizedBox(height: 15),
+                        CustomButton(
+                          text: "Create Account",
+                          fontSize: 18,
+                          onPressed: () {
+                            signUp();
+                          },
+                        ),
+                        SizedBox(height: 10),
+                        CustomButton(
+                          text: "Back",
+                          fontSize: 16,
+                          onPressed: () {
+                            setState(() {
+                              _showSignUpScreen = false;
+                            });
+                          },
+                        ),
+                      ],
+                    )
+                    : Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          "Sign In or Create an Account to Save Your Money!",
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                            fontFamily: 'Minecraft',
+                            shadows: [
+                              Shadow(
+                                offset: Offset(2.4, 2.4),
+                                blurRadius: 0,
+                                color: Color.fromRGBO(63, 63, 63, 1),
+                              ),
+                            ],
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        SizedBox(height: 20),
+                        CustomTextBox(
+                          controller: email,
+                          hintText: "Email",
+                          fontSize: 18,
+                          width: MediaQuery.of(context).size.width * 0.7,
+                        ),
+                        SizedBox(height: 10),
+                        CustomTextBox(
+                          controller: password,
+                          hintText: "Password",
+                          fontSize: 18,
+                          width: MediaQuery.of(context).size.width * 0.7,
+                        ),
+                        SizedBox(height: 8),
+                        RichText(
+                          textAlign: TextAlign.center,
+                          text: TextSpan(
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                              fontFamily: 'Minecraft',
+                              shadows: [
+                                Shadow(
+                                  offset: Offset(1, 1),
+                                  blurRadius: 0,
+                                  color: Color.fromRGBO(63, 63, 63, 1),
+                                ),
+                              ],
+                            ),
+                            children: [
+                              TextSpan(text: 'No Account? Create One '),
+                              WidgetSpan(
+                                alignment: PlaceholderAlignment.middle,
+                                child: GestureDetector(
+                                  onTapDown: (_) {
+                                    setState(() {
+                                      _herePressed = true;
+                                    });
+                                  },
+                                  onTapUp: (_) {
+                                    setState(() {
+                                      _herePressed = false;
+                                      _showSignUpScreen = true;
+                                    });
+                                  },
+                                  onTapCancel: () {
+                                    setState(() {
+                                      _herePressed = false;
+                                    });
+                                  },
+                                  child: Text(
+                                    'Here!',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.bold,
+                                      color:
+                                          _herePressed
+                                              ? Colors.orange
+                                              : Colors.yellow,
+                                      fontFamily: 'Minecraft',
+                                      shadows: [
+                                        Shadow(
+                                          offset: Offset(1, 1),
+                                          blurRadius: 0,
+                                          color: Color.fromRGBO(63, 63, 63, 1),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(height: 15),
+                        CustomButton(
+                          text: "Log In",
+                          fontSize: 18,
+                          onPressed: () {
+                            logIn();
+                          },
+                        ),
+                        SizedBox(height: 10),
+                        CustomButton(
+                          text: "Back",
+                          fontSize: 16,
+                          onPressed: () {
+                            setState(() {
+                              _selectedOption = null;
+                            });
+                          },
+                        ),
+                      ],
+                    ))
                 : Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
