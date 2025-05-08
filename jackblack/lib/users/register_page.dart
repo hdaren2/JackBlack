@@ -38,55 +38,81 @@ class _RegisterPageState extends State<RegisterPage> {
   // null = show choice, 'signIn' = show sign in form, 'guest' = show guest form
   String? _selectedOption;
 
+  // Track if email is taken
+  bool _emailTaken = false;
+
+  // Track if there was a caught error in signUp
+  bool _signUpError = false;
+
   // Function to register user with their desired username
   void signUp() async {
-    // Attempt to sign up and set user metadata field 'username' to the
-    // user's desired username
+    // Validate fields
+    final snackBarTextStyle = TextStyle(
+      fontFamily: 'Minecraft',
+      fontWeight: FontWeight.bold,
+      color: Colors.white,
+      fontSize: 16,
+    );
+    if (email.text.isEmpty || password.text.isEmpty || userName.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Please fill in all fields.', style: snackBarTextStyle),
+          backgroundColor: Colors.grey.shade900,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
     try {
       await Supabase.instance.client.auth.signUp(
         email: email.text,
         password: password.text,
         data: {'username': userName.text},
       );
-
-      // If successfully signed in, go to TitlePage or ModePage to start playing
-      // Maybe add like a snackbar or dialog box to indicate that user successfully
-      // setup their username? Something like "Welcome <username>!"
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => TitlePage()),
       );
-    }
-    // If unable to sign in/sign up for any reason
-    catch (e) {
-      // Technically should add a snackbar or some dialog box to tell
-      // user that they couldn't sign in, but for now just print it
-      // to the console for debugging purposes.
+    } catch (e) {
+      setState(() {
+        _signUpError = true;
+      });
+      _showSignUpErrorSnackbar();
       print("Error: $e");
     }
   }
 
   void signUpAnonymous() async {
-    // Attempt to sign up and set user metadata field 'username' to the
-    // user's desired username
+    // Validate field
+    final snackBarTextStyle = TextStyle(
+      fontFamily: 'Minecraft',
+      fontWeight: FontWeight.bold,
+      color: Colors.white,
+      fontSize: 16,
+    );
+    if (anonName.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Please enter a username.', style: snackBarTextStyle),
+          backgroundColor: Colors.grey.shade900,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
     try {
       await Supabase.instance.client.auth.signInAnonymously(
         data: {'username': anonName.text},
       );
-
-      // If successfully signed in, go to TitlePage or ModePage to start playing
-      // Maybe add like a snackbar or dialog box to indicate that user successfully
-      // setup their username? Something like "Welcome <username>!"
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => TitlePage()),
       );
-    }
-    // If unable to sign in/sign up for any reason
-    catch (e) {
-      // Technically should add a snackbar or some dialog box to tell
-      // user that they couldn't sign in, but for now just print it
-      // to the console for debugging purposes.
+    } catch (e) {
+      setState(() {
+        _signUpError = true;
+      });
+      _showSignUpErrorSnackbar();
       print("Error: $e");
     }
   }
@@ -270,5 +296,42 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
       ),
     );
+  }
+
+  @override
+  void didUpdateWidget(covariant RegisterPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _showSignUpErrorSnackbar();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _showSignUpErrorSnackbar();
+  }
+
+  void _showSignUpErrorSnackbar() {
+    if (_signUpError) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Email Taken or Invalid/Password Must be 6+ Characters',
+              style: TextStyle(
+                fontFamily: 'Minecraft',
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+                fontSize: 16,
+              ),
+            ),
+            backgroundColor: Colors.grey.shade900,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        setState(() {
+          _signUpError = false;
+        });
+      });
+    }
   }
 }
