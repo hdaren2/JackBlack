@@ -7,6 +7,7 @@ class Player {
   double funds;
   List<Hand> hands = []; //multiple hands in case splitting
   //will add stats and way to keep track of them
+  bool isDone = false;
 
   Player({
     required this.name,

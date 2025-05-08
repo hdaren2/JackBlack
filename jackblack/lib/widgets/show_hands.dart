@@ -86,19 +86,27 @@ class CardRow extends StatelessWidget {
 
       double cardHeight = cardWidth * 1.51282;
       
-      return SizedBox(
-        width: totalOverlapWidth,
-        height: cardHeight,
-        child: Stack(
-          clipBehavior: Clip.none,
-          children: List.generate(
-            cardCount,
-            (index) => Positioned(
-              left: index * visibleCardPortion,
-              child: cards[index],
+      return Row(
+        //mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Center(
+            child: SizedBox(
+              width: totalOverlapWidth,
+              height: cardHeight,
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: List.generate(
+                  cardCount,
+                  (index) => Positioned(
+                    left: index * visibleCardPortion,
+                    child: cards[index],
+                  ),
+                ),
+              ),
             ),
           ),
-        ),
+        ],
       );
     }
   }

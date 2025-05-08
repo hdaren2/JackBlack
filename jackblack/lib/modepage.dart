@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:jackblack/game.dart';
+import 'package:jackblack/single_player_game.dart';
 import 'package:jackblack/titlepage.dart';
 import 'package:jackblack/widgets/custom_button.dart';
 import 'package:jackblack/rooms/room_selection.dart';
+import 'package:jackblack/local_multiplayer.dart';
+
 
 class ModePage extends StatefulWidget {
   const ModePage({super.key});
@@ -122,7 +124,37 @@ class _ModePageState extends State<ModePage> {
                   PageRouteBuilder(
                     pageBuilder:
                         (context, animation, secondaryAnimation) =>
-                            const GamePage(),
+                            const SinglePlayer(),
+                    transitionsBuilder: (
+                      context,
+                      animation,
+                      secondaryAnimation,
+                      child,
+                    ) {
+                      final fadeAnimation = CurvedAnimation(
+                        parent: animation,
+                        curve: Curves.easeInOut,
+                      );
+                      return FadeTransition(
+                        opacity: fadeAnimation,
+                        child: child,
+                      );
+                    },
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 25),
+            CustomButton(
+              text: "Local Multiplayer",
+              width: 302,
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  PageRouteBuilder(
+                    pageBuilder:
+                        (context, animation, secondaryAnimation) =>
+                            const MultiPlayer(),
                     transitionsBuilder: (
                       context,
                       animation,
