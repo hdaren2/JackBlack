@@ -1,52 +1,104 @@
 import 'package:flutter/material.dart';
 import 'package:jackblack/gameplay_instructions.dart';
 import 'package:jackblack/modepage.dart';
+import 'package:jackblack/users/auth_service.dart';
 import 'package:jackblack/widgets/custom_button.dart';
 
-class TitlePage extends StatelessWidget {
+class TitlePage extends StatefulWidget {
   const TitlePage({super.key});
+
+  @override
+  State<TitlePage> createState() => _TitlePageState();
+}
+
+class _TitlePageState extends State<TitlePage> {
+  final String? userName = AuthService().getUsername();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color.fromRGBO(33, 126, 75, 1),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text(
-              "Jack Black Blackjack",
-              textAlign: TextAlign.center,
+      body: Stack(
+        children: [
+          Positioned(
+            top: 40,
+            left: 20,
+            child: Text(
+              "Welcome, $userName!",
               style: TextStyle(
-                fontSize: 40,
+                fontSize: 20,
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
                 fontFamily: 'Minecraft',
                 shadows: [
                   Shadow(
-                    offset: Offset(5, 5),
+                    offset: Offset(3, 3),
                     blurRadius: 0,
                     color: Color.fromRGBO(63, 63, 63, 1),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 40),
-            CustomButton(
-              text: "Start Game",
-              onPressed: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => const ModePage()));
-              },
+          ),
+          Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text(
+                  "Jack Black Blackjack",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 40,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    fontFamily: 'Minecraft',
+                    shadows: [
+                      Shadow(
+                        offset: Offset(5, 5),
+                        blurRadius: 0,
+                        color: Color.fromRGBO(63, 63, 63, 1),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 40),
+                CustomButton(
+                  text: "Start Game",
+                  width: 200, // Set a fixed width
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const ModePage()),
+                    );
+                  },
+                ),
+                const SizedBox(height: 20),
+                CustomButton(
+                  text: "How to Play",
+                  width: 200, // Set the same fixed width
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const GameplayInstructions(),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 20),
+                CustomButton(
+                  text: "Log Out",
+                  fontSize: 16, // Set the font size to 16
+                  onPressed: () {
+                    // Add your logout logic here
+                    AuthService().logOut();
+                    Navigator.pop(context);
+                  },
+                ),
+              ],
             ),
-            const SizedBox(height: 30),
-             CustomButton(
-              text: "How to Play",
-              onPressed: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => const GameplayInstructions()));
-              },
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

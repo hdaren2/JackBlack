@@ -19,6 +19,7 @@ class UsernamePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       // On app startup, go to auth process
       home: AuthGate(),
     );

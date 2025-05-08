@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:jackblack/titlepage.dart'; // make sure this path is correct
+import 'package:jackblack/titlepage.dart';
+import 'package:jackblack/widgets/custom_button.dart'; // make sure this path is correct
 
 class GameplayInstructions extends StatelessWidget {
   const GameplayInstructions({super.key});
@@ -118,32 +119,16 @@ class GameplayInstructions extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 20),
-            SizedBox(
-              width: 260,
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => const TitlePage()),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color.fromRGBO(198, 255, 202, 1),
-                  foregroundColor: const Color.fromRGBO(0, 0, 0, 1),
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  textStyle: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                child: const Text(
-                  "Back to Title",
-                  style: TextStyle(fontFamily: 'Minecraft'),
-                ),
-              ),
+            CustomButton(
+              text: "Back to Title",
+              fontSize: 20,
+              width: 270, // Set the same width as the previous button
+              onPressed: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => const TitlePage()),
+                );
+              },
             ),
             const SizedBox(height: 20),
           ],

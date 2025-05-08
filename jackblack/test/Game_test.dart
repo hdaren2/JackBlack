@@ -4,6 +4,7 @@ import 'package:jackblack/game.dart';
 import 'package:jackblack/card.dart';
 import 'package:jackblack/hand.dart';
 import 'package:jackblack/player.dart';
+import 'package:jackblack/widgets/custom_button.dart';
 
 void main() {
   group('Edge Cases', () {
@@ -15,7 +16,7 @@ void main() {
 
     testWidgets('Multiple Aces in hand', (WidgetTester tester) async {
       // Create a test widget
-      final testWidget = MaterialApp(home: gamePage);
+      final testWidget = MaterialApp(debugShowCheckedModeBanner: false, home: gamePage);
 
       // Pump the widget into the widget tree
       await tester.pumpWidget(testWidget);
