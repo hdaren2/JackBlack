@@ -525,7 +525,7 @@ class _MultiPlayerState extends State<MultiPlayer> {
                 CustomButton(
                   text: "Yes",
                   onPressed: () {
-                    Navigator.pushReplacementNamed(context, "title");
+                    Navigator.popUntil(context, (route) => route.isFirst);
                   },
                 ),
               ],

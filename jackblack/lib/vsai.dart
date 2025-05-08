@@ -500,7 +500,7 @@ class _GamePageState extends State<GamePage> {
               CustomButton(
                 text: "Yes",
                 onPressed: () {
-                  Navigator.pushReplacementNamed(context, "title");
+                  Navigator.popUntil(context, (route) => route.isFirst);
                 },
               ),
             ],
