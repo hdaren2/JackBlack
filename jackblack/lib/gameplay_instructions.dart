@@ -82,7 +82,7 @@ class GameplayInstructions extends StatelessWidget {
                   ),
                   SizedBox(height: 16),
                   Text(
-                    'How Betting works',
+                    'How Betting Works',
                     style: TextStyle(
                       fontFamily: 'Minecraft',
                       fontSize: 24,
@@ -120,9 +120,8 @@ class GameplayInstructions extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             CustomButton(
-              text: "Back to Title",
+              text: "Back",
               fontSize: 20,
-              width: 270, // Set the same width as the previous button
               onPressed: () {
                 Navigator.pop(context);
               },

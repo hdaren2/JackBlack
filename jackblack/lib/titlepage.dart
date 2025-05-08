@@ -125,9 +125,9 @@ class _TitlePageState extends State<TitlePage> {
                 const SizedBox(height: 20),
                 CustomButton(
                   text: "Log Out",
-                  fontSize: 16, // Set the font size to 16
+                  fontSize: 23,
+                  width: 200,
                   onPressed: () {
-                    // Add your logout logic here
                     AuthService().logOut();
                     Navigator.pop(context);
                   },

@@ -144,7 +144,7 @@ class _ModePageState extends State<ModePage> {
             ),
             const SizedBox(height: 25),
             CustomButton(
-              text: "Open Rooms",
+              text: "Host/Join Game",
               width: 302,
               onPressed: () {
                 Navigator.push(

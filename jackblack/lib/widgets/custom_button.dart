@@ -101,7 +101,6 @@ class _CustomButtonState extends State<CustomButton> {
                 fontSize: widget.fontSize,
                 color: Colors.white,
                 fontFamily: 'Minecraft',
-                fontWeight: FontWeight.bold,
                 shadows: [
                   Shadow(
                     offset: widget.shadowOffset,

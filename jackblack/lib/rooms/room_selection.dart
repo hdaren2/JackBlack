@@ -117,7 +117,7 @@ class _RoomSelectionPageState extends State<RoomSelectionPage> {
     return Scaffold(
       backgroundColor: const Color.fromRGBO(33, 126, 75, 1),
       appBar: AppBar(
-        title: Text(widget.isHosting ? 'Host Game' : 'Join Game'),
+        title: Text(widget.isHosting ? 'Host Game' : 'Join Game', style: TextStyle(fontFamily: 'Minecraft', fontSize: 24, color: Colors.white, shadows: [Shadow(offset: Offset(2, 2), blurRadius: 0, color: Color.fromRGBO(63, 63, 63, 1))])),
         backgroundColor: const Color.fromRGBO(33, 126, 75, 1),
       ),
       body:
@@ -130,12 +130,25 @@ class _RoomSelectionPageState extends State<RoomSelectionPage> {
                   children: [
                     if (widget.isHosting) ...[
                       TextField(
+                        cursorColor: Color.fromRGBO(66, 66, 66, 1),
+                        style: TextStyle(
+                          fontFamily: 'Minecraft'
+                        ),
                         controller: _roomNameController,
                         decoration: const InputDecoration(
                           labelText: 'Room Name',
                           filled: true,
                           fillColor: Colors.white,
-                          border: OutlineInputBorder(),
+                          border: OutlineInputBorder(
+                            borderSide: BorderSide(color: Color.fromRGBO(66, 66, 66, 1))
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Color.fromRGBO(66, 66, 66, 1))
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Color.fromRGBO(66, 66, 66, 1))
+                          ),
+                          labelStyle: TextStyle(color: Color.fromRGBO(66, 66, 66, 1), fontFamily: 'Minecraft')
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -149,8 +162,16 @@ class _RoomSelectionPageState extends State<RoomSelectionPage> {
                       'Available Rooms',
                       style: TextStyle(
                         fontSize: 20,
-                        fontWeight: FontWeight.bold,
+                        //fontWeight: FontWeight.bold,
                         color: Colors.white,
+                        fontFamily: 'Minecraft',
+                        shadows: [
+                          Shadow(
+                            offset: Offset(2, 2),
+                            blurRadius: 0,
+                            color: Color.fromRGBO(63, 63, 63, 1),
+                          ),
+                        ],
                       ),
                     ),
                     const SizedBox(height: 10),

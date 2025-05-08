@@ -310,16 +310,10 @@ class _GamePageState extends State<GamePage> {
               children: [
                 Row(
                   children: [
-                    Image.asset(
-                      'assets/Screenshot 2025-04-23 at 4.03.13 PM-1.png.png',
-                      width: 20,
-                      height: 20,
-                    ),
-                    SizedBox(width: 5),
                     Text(
-                      "\$${player.funds}",
+                      "Funds: ${player.funds}",
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: 20,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                         fontFamily: 'Minecraft',
@@ -332,17 +326,29 @@ class _GamePageState extends State<GamePage> {
                         ],
                       ),
                     ),
+                    SizedBox(width: 5),
+                    Image.asset(
+                      'assets/Screenshot 2025-04-23 at 4.03.13 PM-1.png.png',
+                      width: 25,
+                      height: 25,
+                    ),
                   ],
                 ),
                 SizedBox(width: 20),
-                Text("Bet: \$$initialBet",
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                  fontFamily: 'Minecraft',
-                  shadows: [Shadow(offset: Offset(2.9,3.1), blurRadius: 0, color: Color.fromRGBO(63,63,63,1))]
+                Text("Bet: $initialBet",
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    fontFamily: 'Minecraft',
+                    shadows: [Shadow(offset: Offset(2.9,3.1), blurRadius: 0, color: Color.fromRGBO(63,63,63,1))]
+                  ),
                 ),
+                SizedBox(width: 5),
+                Image.asset(
+                  'assets/Screenshot 2025-04-23 at 4.03.13 PM-1.png.png',
+                  width: 25,
+                  height: 25,
                 ),
               ],
             ),
@@ -358,7 +364,6 @@ class _GamePageState extends State<GamePage> {
             "Dealer",
             style: TextStyle(
               fontSize: 14,
-              fontWeight: FontWeight.bold,
               color: Colors.white,
               fontFamily: 'Minecraft',
               shadows: [
@@ -394,7 +399,6 @@ class _GamePageState extends State<GamePage> {
           SizedBox(height: 25),
           Text("Player",  style: TextStyle(
               fontSize: 14,
-              fontWeight: FontWeight.bold,
               color: Colors.white,
               fontFamily: 'Minecraft',
               shadows: [Shadow(offset:Offset(2.4, 2.4), blurRadius: 0, color: Color.fromRGBO(63, 63, 63, 1))]
@@ -407,14 +411,16 @@ class _GamePageState extends State<GamePage> {
               color: Color.fromRGBO(23, 107, 61, 1),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: MultiHandCardRow(
-              maxWidth: (MediaQuery.sizeOf(context).width - 12 * 2),
-              Hands: player.hands.map((group) {
-                return group.hand.map((card) {
-                  return PlayingCardWidget(card: card);
-                }).toList();
-              }).toList(),
-            ),
+            child: IntrinsicWidth(
+              child: MultiHandCardRow(
+                maxWidth: (MediaQuery.sizeOf(context).width - 12 * 2),
+                Hands: player.hands.map((group) {
+                  return group.hand.map((card) {
+                    return PlayingCardWidget(card: card);
+                  }).toList();
+                }).toList(),
+              ),
+            )
             // Wrap(
             //   spacing: 8,
             //   runSpacing: 8,
@@ -444,7 +450,6 @@ class _GamePageState extends State<GamePage> {
                   child: Text("Sum: ${player.hands[index ~/ 2].sum}",
                           style: TextStyle(
                             fontSize: 14,
-                            fontWeight: FontWeight.bold,
                             color: Colors.white,
                             fontFamily: 'Minecraft',
                             shadows: [Shadow(offset: Offset(3, 2.7), blurRadius: 0, color: Color.fromRGBO(63, 63, 63, 1))]
@@ -466,7 +471,20 @@ class _GamePageState extends State<GamePage> {
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(betMessage),
+          Text(betMessage,
+            style: TextStyle(
+              fontSize: 18,
+              color: Colors.white,
+              fontFamily: 'Minecraft',
+              shadows: [
+                Shadow(
+                  offset: Offset(2.4, 2.4),
+                  blurRadius: 0,
+                  color: Color.fromRGBO(63, 63, 63, 1),
+                ),
+              ],
+            ),
+          ),
           SizedBox(height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -506,7 +524,6 @@ class _GamePageState extends State<GamePage> {
             "Leave game?",
             style: TextStyle(
               fontSize: 28,
-              fontWeight: FontWeight.bold,
               color: Colors.white,
               fontFamily: 'Minecraft',
               shadows: [
@@ -558,8 +575,7 @@ class _GamePageState extends State<GamePage> {
                     child: Text(player.hands[index ~/ 2].handResult,
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.bold,
+                              fontSize: 24,
                               color: Colors.white,
                               fontFamily: 'Minecraft',
                               shadows: [Shadow(offset: Offset(3, 2.7), blurRadius: 0, color: Color.fromRGBO(63, 63, 63, 1))]
@@ -695,16 +711,10 @@ class _GamePageState extends State<GamePage> {
             children: [
               Row(
                 children: [
-                  Image.asset(
-                    'assets/Screenshot 2025-04-23 at 4.03.13 PM-1.png.png',
-                    width: 20,
-                    height: 20,
-                  ),
-                  SizedBox(width: 5),
                   Text(
-                    "\$${player.funds}",
+                    "Funds: ${player.funds}",
                     style: TextStyle(
-                      fontSize: 14,
+                      fontSize: 20,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
                       fontFamily: 'Minecraft',
@@ -717,22 +727,38 @@ class _GamePageState extends State<GamePage> {
                       ],
                     ),
                   ),
+                  SizedBox(width: 5),
+                  Image.asset(
+                    'assets/Screenshot 2025-04-23 at 4.03.13 PM-1.png.png',
+                    width: 25,
+                    height: 25,
+                  ),
                 ],
               ),
-              Text(roundOver ? "" : "Bet: \$${curHand.bet}",
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                  fontFamily: 'Minecraft',
-                  shadows: [
-                    Shadow(
-                      offset: Offset(2.4, 2.4),
-                      blurRadius: 0,
-                      color: Color.fromRGBO(63, 63, 63, 1),
+              Row(
+                children: [
+                  Text(roundOver ? "" : "Bet: ${curHand.bet}",
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      fontFamily: 'Minecraft',
+                      shadows: [
+                        Shadow(
+                          offset: Offset(2.4, 2.4),
+                          blurRadius: 0,
+                          color: Color.fromRGBO(63, 63, 63, 1),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                  SizedBox(width: 5),
+                  Image.asset(
+                    'assets/Screenshot 2025-04-23 at 4.03.13 PM-1.png.png',
+                    width: 25,
+                    height: 25,
+                  ),
+                ],
               ),
             ],
           ),

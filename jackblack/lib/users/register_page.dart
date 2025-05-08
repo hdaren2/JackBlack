@@ -270,9 +270,9 @@ class _RegisterPageState extends State<RegisterPage> {
                     ),
                     SizedBox(height: 36),
                     Text(
-                      "Save Your Money with an Account!",
+                      "Use an account to save your progress.",
                       style: TextStyle(
-                        fontSize: 22,
+                        fontSize: 16,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                         fontFamily: 'Minecraft',
@@ -296,10 +296,11 @@ class _RegisterPageState extends State<RegisterPage> {
                         });
                       },
                     ),
-                    SizedBox(height: 12),
+                    SizedBox(height: 15),
                     CustomButton(
-                      text: "Continue as Guest",
+                      text: "Play as Guest",
                       fontSize: 18,
+                      width: 283,
                       onPressed: () {
                         setState(() {
                           _selectedOption = 'guest';
@@ -314,15 +315,15 @@ class _RegisterPageState extends State<RegisterPage> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          "Create an Account!",
+                          "Create an Account",
                           style: TextStyle(
-                            fontSize: 22,
+                            fontSize: 40,
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
                             fontFamily: 'Minecraft',
                             shadows: [
                               Shadow(
-                                offset: Offset(2.4, 2.4),
+                                offset: Offset(5, 5),
                                 blurRadius: 0,
                                 color: Color.fromRGBO(63, 63, 63, 1),
                               ),
@@ -337,14 +338,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           fontSize: 18,
                           width: MediaQuery.of(context).size.width * 0.7,
                         ),
-                        SizedBox(height: 10),
-                        CustomTextBox(
-                          controller: password,
-                          hintText: "Password",
-                          fontSize: 18,
-                          width: MediaQuery.of(context).size.width * 0.7,
-                        ),
-                        SizedBox(height: 10),
+                        SizedBox(height: 15),
                         CustomTextBox(
                           controller: userName,
                           hintText: "Username",
@@ -352,6 +346,13 @@ class _RegisterPageState extends State<RegisterPage> {
                           width: MediaQuery.of(context).size.width * 0.7,
                         ),
                         SizedBox(height: 15),
+                        CustomTextBox(
+                          controller: password,
+                          hintText: "Password",
+                          fontSize: 18,
+                          width: MediaQuery.of(context).size.width * 0.7,
+                        ),
+                        SizedBox(height: 30),
                         CustomButton(
                           text: "Create Account",
                           fontSize: 18,
@@ -359,10 +360,11 @@ class _RegisterPageState extends State<RegisterPage> {
                             signUp();
                           },
                         ),
-                        SizedBox(height: 10),
+                        SizedBox(height: 15),
                         CustomButton(
                           text: "Back",
-                          fontSize: 16,
+                          fontSize: 18,
+                          width: 200,
                           onPressed: () {
                             setState(() {
                               _showSignUpScreen = false;
@@ -375,15 +377,15 @@ class _RegisterPageState extends State<RegisterPage> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          "Sign In or Create an Account to Save Your Money!",
+                          "Log In",
                           style: TextStyle(
-                            fontSize: 22,
+                            fontSize: 40,
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
                             fontFamily: 'Minecraft',
                             shadows: [
                               Shadow(
-                                offset: Offset(2.4, 2.4),
+                                offset: Offset(5, 5),
                                 blurRadius: 0,
                                 color: Color.fromRGBO(63, 63, 63, 1),
                               ),
@@ -398,14 +400,14 @@ class _RegisterPageState extends State<RegisterPage> {
                           fontSize: 18,
                           width: MediaQuery.of(context).size.width * 0.7,
                         ),
-                        SizedBox(height: 10),
+                        SizedBox(height: 15),
                         CustomTextBox(
                           controller: password,
                           hintText: "Password",
                           fontSize: 18,
                           width: MediaQuery.of(context).size.width * 0.7,
                         ),
-                        SizedBox(height: 8),
+                        SizedBox(height: 15),
                         RichText(
                           textAlign: TextAlign.center,
                           text: TextSpan(
@@ -423,7 +425,7 @@ class _RegisterPageState extends State<RegisterPage> {
                               ],
                             ),
                             children: [
-                              TextSpan(text: 'No Account? Create One '),
+                              TextSpan(text: 'New user? '),
                               WidgetSpan(
                                 alignment: PlaceholderAlignment.middle,
                                 child: GestureDetector(
@@ -444,7 +446,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                     });
                                   },
                                   child: Text(
-                                    'Here!',
+                                    'Create account',
                                     style: TextStyle(
                                       fontSize: 13,
                                       fontWeight: FontWeight.bold,
@@ -467,18 +469,20 @@ class _RegisterPageState extends State<RegisterPage> {
                             ],
                           ),
                         ),
-                        SizedBox(height: 15),
+                        SizedBox(height: 30),
                         CustomButton(
                           text: "Log In",
                           fontSize: 18,
+                          width: 110,
                           onPressed: () {
                             logIn();
                           },
                         ),
-                        SizedBox(height: 10),
+                        SizedBox(height: 15),
                         CustomButton(
                           text: "Back",
-                          fontSize: 16,
+                          fontSize: 18,
+                          width: 110,
                           onPressed: () {
                             setState(() {
                               _selectedOption = null;
@@ -491,9 +495,9 @@ class _RegisterPageState extends State<RegisterPage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      "Continue as Guest",
+                      "Play as Guest",
                       style: TextStyle(
-                        fontSize: 22,
+                        fontSize: 40,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                         fontFamily: 'Minecraft',
@@ -514,7 +518,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       fontSize: 18,
                       width: MediaQuery.of(context).size.width * 0.7,
                     ),
-                    SizedBox(height: 15),
+                    SizedBox(height: 30),
                     CustomButton(
                       text: "Let's Gamble!",
                       fontSize: 18,
@@ -522,10 +526,11 @@ class _RegisterPageState extends State<RegisterPage> {
                         signUpAnonymous();
                       },
                     ),
-                    SizedBox(height: 10),
+                    SizedBox(height: 15),
                     CustomButton(
                       text: "Back",
-                      fontSize: 16,
+                      fontSize: 18,
+                      width: 165,
                       onPressed: () {
                         setState(() {
                           _selectedOption = null;
