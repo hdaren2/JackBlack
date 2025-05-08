@@ -182,7 +182,7 @@ class _MultiPlayerState extends State<MultiPlayer> {
                       "Sum: ${player.hands[0].sum}",
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: 20,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                         fontFamily: 'Minecraft',
@@ -273,7 +273,7 @@ class _MultiPlayerState extends State<MultiPlayer> {
                     Text(
                       "\$${curPlayer.funds}",
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: 20,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                         fontFamily: 'Minecraft',
@@ -394,7 +394,7 @@ class _MultiPlayerState extends State<MultiPlayer> {
                     "Sum: ${player.hands[0].sum}",
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      fontSize: 14,
+                      fontSize: 20,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
                       fontFamily: 'Minecraft',
