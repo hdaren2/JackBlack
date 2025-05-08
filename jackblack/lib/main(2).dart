@@ -3,6 +3,7 @@ import 'package:jackblack/modepage.dart';
 import 'package:jackblack/titlepage.dart';
 import 'package:jackblack/users/auth_gate.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import "package:jackblack/users/start.dart";
 
 
 void main() async {
@@ -33,7 +34,7 @@ class MyApp extends StatelessWidget {
       ),
       initialRoute: "auth",
       routes: {
-        "auth": (context) => const AuthGate(),
+        "auth": (context) => const UsernamePage(),
         "title": (context) => const TitlePage(),
         "mode": (context) => const ModePage(),
       },

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:jackblack/gameplay_instructions.dart';
+import 'package:jackblack/modepage.dart';
 import 'package:jackblack/widgets/custom_button.dart';
 
 class TitlePage extends StatelessWidget {
@@ -34,7 +35,7 @@ class TitlePage extends StatelessWidget {
             CustomButton(
               text: "Start Game",
               onPressed: () {
-                Navigator.pushReplacementNamed(context, "mode");
+                Navigator.push(context, MaterialPageRoute(builder: (context) => const ModePage()));
               },
             ),
             const SizedBox(height: 30),

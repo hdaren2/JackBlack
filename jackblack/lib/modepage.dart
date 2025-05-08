@@ -115,6 +115,7 @@ class _ModePageState extends State<ModePage> {
             const SizedBox(height: 40),
             CustomButton(
               text: "Play Against Dealer",
+              width: 302,
               onPressed: () {
                 Navigator.push(
                   context,
