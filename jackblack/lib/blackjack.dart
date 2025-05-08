@@ -27,6 +27,39 @@ class BlackJack {
   Player get curPlayer => players[curPlayerIndex];
   Hand get curHand => curPlayer.hands[curHandIndex];
 
+  void addPlayerObject(Player p){
+      players.add(p);
+  }
+
+  void removePlayerObject(Player p){
+      players.remove(p);
+  }
+
+  //defaults to 1000 money
+  void addPlayer(String id, {funds = 1000}){
+      players.add(Player(name: id, funds: funds));
+  }
+
+  void removePlayer(String id) {
+      int playerIndex = players.indexWhere((player) => player.name == id);
+      
+      if (playerIndex != -1) {
+        if (playerIndex <= curPlayerIndex) {
+          curPlayerIndex = curPlayerIndex > 0 
+              ? curPlayerIndex - 1 
+              : 0;
+        }
+        
+        players.removeAt(playerIndex);
+        
+        if (players.isEmpty) {
+          curPlayerIndex = 0;
+        } else {
+          curPlayerIndex = curPlayerIndex.clamp(0, players.length - 1);
+        }
+      }
+  }
+
   void nextPlayer(){
     //check if last player or automatic blackjack or surrender
     if (curPlayerIndex + 1 < players.length) {

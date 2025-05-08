@@ -15,18 +15,61 @@ class MultiPlayer extends StatefulWidget {
 }
 
 class _MultiPlayerState extends State<MultiPlayer> {
-  final BlackJack _game = BlackJack(players: 
-    [Player(name: "p1", funds: 1000),
-    Player(name: "p2", funds: 1000),
-    Player(name: "p3", funds: 1000),
-    Player(name: "p4", funds: 1000)]);
+  late final BlackJack _game;
+
+  // final BlackJack _game = BlackJack(players: 
+  //   [Player(name: "p1", funds: 1000),
+  //   Player(name: "p2", funds: 1000),
+  //   Player(name: "p3", funds: 1000),
+  //   Player(name: "p4", funds: 1000)]);
 
   Player get curPlayer => _game.players[_game.curPlayerIndex];
   Hand get curHand => curPlayer.hands[_game.curHandIndex];
 
+   void addPlayerObject(Player p){
+    setState(() {
+      _game.players.add(p);
+    });
+  }
+
+  void removePlayerObject(Player p){
+    setState(() {
+      _game.players.remove(p);
+    });
+  }
+
+  //defaults to 1000 money
+  void addPlayer(String id, {funds = 1000}){
+    setState(() {
+      _game.players.add(Player(name: id, funds: funds));
+    });
+  }
+
+  void removePlayer(String id) {
+    setState(() {
+      int playerIndex = _game.players.indexWhere((player) => player.name == id);
+      
+      if (playerIndex != -1) {
+        if (playerIndex <= _game.curPlayerIndex) {
+          _game.curPlayerIndex = _game.curPlayerIndex > 0 
+              ? _game.curPlayerIndex - 1 
+              : 0;
+        }
+        
+        _game.players.removeAt(playerIndex);
+        
+        if (_game.players.isEmpty) {
+          _game.curPlayerIndex = 0;
+        } else {
+          _game.curPlayerIndex = _game.curPlayerIndex.clamp(0, _game.players.length - 1);
+        }
+      }
+    });
+  }
+
   void startGame(){
     setState(() {
-          _game.startGame();
+      _game.startGame();
 
     });
   }
