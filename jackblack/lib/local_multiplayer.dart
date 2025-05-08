@@ -24,8 +24,6 @@ class _MultiPlayerState extends State<MultiPlayer> {
     ],
   );
 
-  String? _lastPlayerName; // <-- Track previous player
-
   Player get curPlayer => _game.players[_game.curPlayerIndex];
   Hand get curHand => curPlayer.hands[_game.curHandIndex];
 
@@ -103,25 +101,9 @@ class _MultiPlayerState extends State<MultiPlayer> {
 
   @override
   Widget build(BuildContext context) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_lastPlayerName != curPlayer.name &&
-          !_game.showBetPrompt &&
-          !_game.roundOver) {
-        _lastPlayerName = curPlayer.name;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              "${curPlayer.name}'s turn!",
-              textAlign: TextAlign.center,
-            ),
-            duration: Duration(seconds: 2),
-            behavior: SnackBarBehavior.floating,
-            backgroundColor: Colors.green[700],
-          ),
-        );
-      }
-    });
-
+    print(
+      "Game state: showBetPrompt=${_game.showBetPrompt}, showQuitPrompt=${_game.showQuitPrompt}, roundOver=${_game.roundOver}, isDealerTurn=${_game.isDealerTurn}, currentPlayer=${curPlayer.name}",
+    );
     return Scaffold(
       backgroundColor: Color.fromRGBO(33, 126, 75, 1),
       body: SafeArea(
@@ -130,6 +112,30 @@ class _MultiPlayerState extends State<MultiPlayer> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               SizedBox(height: 40),
+              if (!_game.showBetPrompt &&
+                  !_game.showQuitPrompt &&
+                  !_game.roundOver &&
+                  !_game.isDealerTurn)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: Text(
+                    "${curPlayer.name}'s Turn",
+                    style: TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      fontFamily: 'Minecraft',
+                      shadows: [
+                        Shadow(
+                          offset: Offset(3.0, 3.0),
+                          blurRadius: 0,
+                          color: Color.fromRGBO(63, 63, 63, 1),
+                        ),
+                      ],
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
               // Top section - First two player hands
               _buildTopPlayersSection(),
 
@@ -182,7 +188,7 @@ class _MultiPlayerState extends State<MultiPlayer> {
                       "Sum: ${player.hands[0].sum}",
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        fontSize: 20,
+                        fontSize: 14,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                         fontFamily: 'Minecraft',
@@ -215,7 +221,7 @@ class _MultiPlayerState extends State<MultiPlayer> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              "${curPlayer.name}, make a bet to start:",
+              "${curPlayer.name}, m a bet to start:",
               style: TextStyle(
                 fontSize: 28,
                 fontWeight: FontWeight.bold,
@@ -273,7 +279,7 @@ class _MultiPlayerState extends State<MultiPlayer> {
                     Text(
                       "\$${curPlayer.funds}",
                       style: TextStyle(
-                        fontSize: 20,
+                        fontSize: 14,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                         fontFamily: 'Minecraft',
@@ -365,58 +371,42 @@ class _MultiPlayerState extends State<MultiPlayer> {
     );
   }
 
-Widget _buildBottomPlayersSection() {
-  if (_game.showBetPrompt) {
-    return SizedBox(
-      height: MediaQuery.of(context).size.height * 0.1,
-    );
-  }
+  Widget _buildBottomPlayersSection() {
+    // Only show this section when not in bet prompt mode
+    if (_game.showBetPrompt) {
+      return SizedBox(height: MediaQuery.of(context).size.height * 0.1);
+    }
 
-  final bottomPlayers = _game.players.length > 2
-      ? _game.players.sublist(2, min(4, _game.players.length))
-      : [];
+    // Get the last two players (or fewer if not enough players)
+    final bottomPlayers =
+        _game.players.length > 2
+            ? _game.players.sublist(2, min(4, _game.players.length))
+            : [];
 
-  if (bottomPlayers.isEmpty) {
-    return SizedBox(
-      height: MediaQuery.of(context).size.height * 0.1,
-    );
-  }
+    if (bottomPlayers.isEmpty) {
+      return SizedBox(height: MediaQuery.of(context).size.height * 0.1);
+    }
 
-  return Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-    child: Column(
+    return Column(
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            for (var player in bottomPlayers)
-              Expanded(child: PlayerHandDisplay(player: player)),
-            if (bottomPlayers.length < 2) Expanded(child: Container()),
-          ],
-        ),
-
-        SizedBox(height: 8),
-
-        // Their sums underneath
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            ...List.generate(bottomPlayers.length * 2 - 1, (i) {
-              if (i % 2 == 0) {
-                final p = bottomPlayers[i ~/ 2];
+            ...List.generate(bottomPlayers.length * 2 - 1, (index) {
+              if (index % 2 == 0) {
+                final player = bottomPlayers[index ~/ 2];
                 return Expanded(
                   child: Text(
-                    "Sum: ${p.hands[0].sum}",
+                    "Sum: ${player.hands[0].sum}",
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      fontSize: 20,
+                      fontSize: 14,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
                       fontFamily: 'Minecraft',
                       shadows: [
                         Shadow(
-                          offset: Offset(2, 2),
+                          offset: Offset(2.0, 2.0),
                           blurRadius: 0,
                           color: Color.fromRGBO(63, 63, 63, 1),
                         ),
@@ -430,10 +420,19 @@ Widget _buildBottomPlayersSection() {
             }),
           ],
         ),
+        SizedBox(height: 8),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ...bottomPlayers.map(
+              (player) => Expanded(child: PlayerHandDisplay(player: player)),
+            ),
+          ],
+        ),
       ],
-    ),
-  );
-}
+    );
+  }
 
   Widget _buildButtonSection() {
     if (_game.showBetPrompt && !_game.showQuitPrompt) {
@@ -695,48 +694,44 @@ class PlayerHandDisplay extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 6.0),
-      child: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: const Color.fromRGBO(23, 107, 61, 1),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Column(
-          children: [
-            Text(
-              "${player.name} • Funds: \$${player.funds} • Bet: \$${player.hands[0].bet}",
-              style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-                fontFamily: 'Minecraft',
-                shadows: [
-                  Shadow(
-                    offset: Offset(1, 1),
-                    blurRadius: 0,
-                    color: Color.fromRGBO(63, 63, 63, 1),
-                  ),
-                ],
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                for (final hand in player.hands)
-                  for (final card in hand.hand)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                      child: PlayingCardWidget(
-                        card: card,
-                        width: 40, 
-                      ),
-                    ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text(
+            "${player.name} • Funds: \$${player.funds} • Bet: \$${player.hands[0].bet}",
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+              fontFamily: 'Minecraft',
+              shadows: [
+                Shadow(
+                  offset: Offset(1.5, 1.5),
+                  blurRadius: 0,
+                  color: Color.fromRGBO(63, 63, 63, 1),
+                ),
               ],
             ),
-          ],
-        ),
+            textAlign: TextAlign.center,
+          ),
+          SizedBox(height: 8),
+          Container(
+            padding: EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Color.fromRGBO(23, 107, 61, 1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: MultiHandCardRow(
+              maxWidth: (MediaQuery.sizeOf(context).width / 2 - 38),
+              Hands:
+                  player.hands.map((group) {
+                    return group.hand.map((card) {
+                      return PlayingCardWidget(card: card, width: 70);
+                    }).toList();
+                  }).toList(),
+            ),
+          ),
+        ],
       ),
     );
   }
