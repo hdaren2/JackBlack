@@ -173,16 +173,11 @@ class _SinglePlayerState extends State<SinglePlayer> {
               children: [
                 Row(
                   children: [
-                    Image.asset(
-                      'assets/Screenshot 2025-04-23 at 4.03.13 PM-1.png.png',
-                      width: 20,
-                      height: 20,
-                    ),
-                    SizedBox(width: 5),
+                    
                     Text(
-                      "\$${player.funds}",
+                      "\$Funds: ${player.funds}",
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: 20,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                         fontFamily: 'Minecraft',
@@ -195,6 +190,12 @@ class _SinglePlayerState extends State<SinglePlayer> {
                         ],
                       ),
                     ),
+                    SizedBox(width: 5),
+                    Image.asset(
+                      'assets/Screenshot 2025-04-23 at 4.03.13 PM-1.png.png',
+                      width: 25,
+                      height: 25,
+                    ),
                   ],
                 ),
                 SizedBox(width: 20),
@@ -206,7 +207,14 @@ class _SinglePlayerState extends State<SinglePlayer> {
                   fontFamily: 'Minecraft',
                   shadows: [Shadow(offset: Offset(2.9,3.1), blurRadius: 0, color: Color.fromRGBO(63,63,63,1))]
                 ),
+                
                 ),
+                SizedBox(width: 5),
+                Image.asset(
+                      'assets/Screenshot 2025-04-23 at 4.03.13 PM-1.png.png',
+                      width: 25,
+                      height: 25,
+                    ),
               ],
             ),
           ],
@@ -220,7 +228,6 @@ class _SinglePlayerState extends State<SinglePlayer> {
           "Dealer",
           style: TextStyle(
             fontSize: 14,
-            fontWeight: FontWeight.bold,
             color: Colors.white,
             fontFamily: 'Minecraft',
             shadows: [
@@ -259,9 +266,9 @@ class _SinglePlayerState extends State<SinglePlayer> {
             cardWidth: 120.0,
           ),
         SizedBox(height: 25),
+        //players hands
         Text("Player",  style: TextStyle(
             fontSize: 14,
-            fontWeight: FontWeight.bold,
             color: Colors.white,
             fontFamily: 'Minecraft',
             shadows: [Shadow(offset:Offset(2.4, 2.4), blurRadius: 0, color: Color.fromRGBO(63, 63, 63, 1))]
@@ -274,13 +281,16 @@ class _SinglePlayerState extends State<SinglePlayer> {
             color: Color.fromRGBO(23, 107, 61, 1),
             borderRadius: BorderRadius.circular(12),
           ),
-          child: MultiHandCardRow(
-            maxWidth: (MediaQuery.sizeOf(context).width - 12 * 2),
-            Hands: player.hands.map((group) {
-              return group.hand.map((card) {
-                return PlayingCardWidget(card: card);
-              }).toList();
-            }).toList(),
+
+          child: IntrinsicWidth(
+            child: MultiHandCardRow(
+              maxWidth: (MediaQuery.sizeOf(context).width - 12 * 2),
+              Hands: player.hands.map((group) {
+                return group.hand.map((card) {
+                  return PlayingCardWidget(card: card);
+                }).toList();
+              }).toList(),
+            ),
           ),
         ),
         SizedBox(height: 10),
@@ -296,7 +306,6 @@ class _SinglePlayerState extends State<SinglePlayer> {
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 14,
-                      fontWeight: FontWeight.bold,
                       color: Colors.white,
                       fontFamily: 'Minecraft',
                       shadows: [Shadow(offset: Offset(3, 2.7), blurRadius: 0, color: Color.fromRGBO(63, 63, 63, 1))]
@@ -319,7 +328,20 @@ class _SinglePlayerState extends State<SinglePlayer> {
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(_game.betMessage),
+          Text(_game.betMessage,
+            style: TextStyle(
+              fontSize: 18,
+              color: Colors.white,
+              fontFamily: 'Minecraft',
+              shadows: [
+                Shadow(
+                  offset: Offset(2.4, 2.4),
+                  blurRadius: 0,
+                  color: Color.fromRGBO(63, 63, 63, 1),
+                ),
+              ],
+            ),
+          ),
           SizedBox(height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -359,7 +381,6 @@ class _SinglePlayerState extends State<SinglePlayer> {
             "Leave game?",
             style: TextStyle(
               fontSize: 28,
-              fontWeight: FontWeight.bold,
               color: Colors.white,
               fontFamily: 'Minecraft',
               shadows: [
@@ -411,7 +432,7 @@ class _SinglePlayerState extends State<SinglePlayer> {
                     child: Text(player.hands[index ~/ 2].handResult,
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        fontSize: 15,
+                        fontSize: 24,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                         fontFamily: 'Minecraft',
@@ -526,7 +547,7 @@ class _SinglePlayerState extends State<SinglePlayer> {
     );
   }
 
-  Widget _buildStatsSection() {
+Widget _buildStatsSection() {
     if (_game.showBetPrompt) {
       return Column();
     }
@@ -540,16 +561,10 @@ class _SinglePlayerState extends State<SinglePlayer> {
             children: [
               Row(
                 children: [
-                  Image.asset(
-                    'assets/Screenshot 2025-04-23 at 4.03.13 PM-1.png.png',
-                    width: 20,
-                    height: 20,
-                  ),
-                  SizedBox(width: 5),
                   Text(
-                    "\$${player.funds}",
+                    "\$Funds: ${player.funds}",
                     style: TextStyle(
-                      fontSize: 14,
+                      fontSize: 20,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
                       fontFamily: 'Minecraft',
@@ -579,23 +594,40 @@ class _SinglePlayerState extends State<SinglePlayer> {
                   ],
                 ),
               ),
-              Text(_game.roundOver ? "" : "Bet: \$${curHand.bet}",
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                  fontFamily: 'Minecraft',
-                  shadows: [
-                    Shadow(
-                      offset: Offset(2.4, 2.4),
-                      blurRadius: 0,
-                      color: Color.fromRGBO(63, 63, 63, 1),
-                    ),
-                  ],
-                ),
+              SizedBox(width: 5),
+              Image.asset(
+                'assets/Screenshot 2025-04-23 at 4.03.13 PM-1.png.png',
+                width: 25,
+                height: 25,
               ),
             ],
           ),
+        ),
+        SizedBox(width: 5),
+        Row(
+          children: [
+            Text(_game.roundOver ? "" : "Bet: ${curHand.bet}",
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+                fontFamily: 'Minecraft',
+                shadows: [
+                  Shadow(
+                    offset: Offset(2.4, 2.4),
+                    blurRadius: 0,
+                    color: Color.fromRGBO(63, 63, 63, 1),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(width: 5),
+            Image.asset(
+              'assets/Screenshot 2025-04-23 at 4.03.13 PM-1.png.png',
+              width: 25,
+              height: 25,
+            ),
+          ],
         ),
       ],
     );
