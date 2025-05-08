@@ -22,13 +22,12 @@ class _TitlePageState extends State<TitlePage> {
       body: Stack(
         children: [
           Positioned(
-            top: 40,
+            top: 20,
             left: 20,
             child: Text(
               "Welcome, $userName!",
               style: TextStyle(
                 fontSize: 20,
-                fontWeight: FontWeight.bold,
                 color: Colors.white,
                 fontFamily: 'Minecraft',
                 shadows: [

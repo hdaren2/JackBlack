@@ -503,7 +503,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         fontFamily: 'Minecraft',
                         shadows: [
                           Shadow(
-                            offset: Offset(2.4, 2.4),
+                            offset: Offset(5, 5),
                             blurRadius: 0,
                             color: Color.fromRGBO(63, 63, 63, 1),
                           ),

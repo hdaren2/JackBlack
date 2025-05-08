@@ -5,6 +5,7 @@ import 'package:jackblack/player.dart';
 import 'package:jackblack/widgets/custom_button.dart';
 import 'package:jackblack/widgets/show_hands.dart';
 import 'package:jackblack/blackjack.dart';
+import 'package:jackblack/widgets/animated_card.dart';
 
 class SinglePlayer extends StatefulWidget {
   const SinglePlayer({super.key});
@@ -15,12 +16,14 @@ class SinglePlayer extends StatefulWidget {
 
 class _SinglePlayerState extends State<SinglePlayer> {
   final BlackJack _game = BlackJack(players: [Player(name: "p1", funds: 1000)]);
+  bool _isInitialDeal = true;
 
   Player get player => _game.players[0];
   Hand get curHand => player.hands[_game.curHandIndex];
 
   void startGame(){
     _game.startGame();
+    _isInitialDeal = true;
   }
 
   @override
@@ -31,36 +34,42 @@ class _SinglePlayerState extends State<SinglePlayer> {
 
   void hit() {
     setState(() {
+      _isInitialDeal = false;
       _game.hit();
     });
   }
 
   void stand() {
     setState(() {
-    _game.stand();      
+      _isInitialDeal = false;
+      _game.stand();      
     });
   }
 
   void surrender() {
     setState(() {
-    _game.surrender(curHand);
+      _isInitialDeal = false;
+      _game.surrender(curHand);
     });
   }
 
   void doubleDown() {
     setState(() {
+      _isInitialDeal = false;
       _game.doubleDown();
     });
   }
 
   void insurance() {
     setState(() {
+      _isInitialDeal = false;
       _game.insurance();
     });
   }
 
   void split() {
     setState(() {
+      _isInitialDeal = false;
       _game.split();
     });
   }
@@ -175,7 +184,7 @@ class _SinglePlayerState extends State<SinglePlayer> {
                   children: [
                     
                     Text(
-                      "\$Funds: ${player.funds}",
+                      "Funds: ${player.funds}",
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
@@ -199,7 +208,7 @@ class _SinglePlayerState extends State<SinglePlayer> {
                   ],
                 ),
                 SizedBox(width: 20),
-                Text("Bet: \$${_game.initialBet}",
+                Text("Bet: ${_game.initialBet}",
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -245,28 +254,31 @@ class _SinglePlayerState extends State<SinglePlayer> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              PlayingCardWidget(
+              AnimatedCardWidget(
                 card: _game.dealer.hand[0],
+                skipInitialAnimation: _isInitialDeal,
               ),
               SizedBox(width: 8.0),
-              Image.asset(
-                'assets/cards/CARDBACK.png',
-                width: 120.0,
-                fit: BoxFit.cover,
+              AnimatedCardWidget(
+                card: _game.dealer.hand[1],
+                isFaceUp: false,
+                skipInitialAnimation: _isInitialDeal,
               ),
             ],
           )
         :
           CardRow(
             maxWidth: (MediaQuery.sizeOf(context).width - 12 * 2),
-            cards:  _game.dealer.hand.map((card) {
-              return PlayingCardWidget(card: card);
+            cards: _game.dealer.hand.asMap().entries.map((entry) {
+              return AnimatedCardWidget(
+                card: entry.value,
+                skipInitialAnimation: _isInitialDeal,
+              );
             }).toList(),
             cardSpacing: 8.0,
             cardWidth: 120.0,
           ),
         SizedBox(height: 25),
-        //players hands
         Text("Player",  style: TextStyle(
             fontSize: 14,
             color: Colors.white,
@@ -281,13 +293,15 @@ class _SinglePlayerState extends State<SinglePlayer> {
             color: Color.fromRGBO(23, 107, 61, 1),
             borderRadius: BorderRadius.circular(12),
           ),
-
           child: IntrinsicWidth(
             child: MultiHandCardRow(
               maxWidth: (MediaQuery.sizeOf(context).width - 12 * 2),
               Hands: player.hands.map((group) {
-                return group.hand.map((card) {
-                  return PlayingCardWidget(card: card);
+                return group.hand.asMap().entries.map((entry) {
+                  return AnimatedCardWidget(
+                    card: entry.value,
+                    skipInitialAnimation: _isInitialDeal,
+                  );
                 }).toList();
               }).toList(),
             ),
@@ -562,7 +576,7 @@ Widget _buildStatsSection() {
               Row(
                 children: [
                   Text(
-                    "\$Funds: ${player.funds}",
+                    "Funds: ${player.funds}",
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -577,9 +591,15 @@ Widget _buildStatsSection() {
                       ],
                     ),
                   ),
+                  SizedBox(width: 5),
+                  Image.asset(
+                      'assets/Screenshot 2025-04-23 at 4.03.13 PM-1.png.png',
+                      width: 25,
+                      height: 25,
+                    ),
                 ],
               ),
-              Text(curHand.insurance == 0 ? "" : "Insurance: \$${curHand.insurance}",
+              Text(curHand.insurance == 0 ? "" : "Insurance: ${curHand.insurance}",
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
@@ -595,39 +615,41 @@ Widget _buildStatsSection() {
                 ),
               ),
               SizedBox(width: 5),
-              Image.asset(
-                'assets/Screenshot 2025-04-23 at 4.03.13 PM-1.png.png',
-                width: 25,
-                height: 25,
+              if (curHand.insurance != 0)
+                Image.asset(
+                  'assets/Screenshot 2025-04-23 at 4.03.13 PM-1.png.png',
+                  width: 25,
+                  height: 25,
+                ),
+              SizedBox(width: 5),
+              Row(
+                children: [
+                  Text(_game.roundOver ? "" : "Bet: ${curHand.bet}",
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      fontFamily: 'Minecraft',
+                      shadows: [
+                        Shadow(
+                          offset: Offset(2.4, 2.4),
+                          blurRadius: 0,
+                          color: Color.fromRGBO(63, 63, 63, 1),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(width: 5),
+                  if (!_game.roundOver)
+                    Image.asset(
+                      'assets/Screenshot 2025-04-23 at 4.03.13 PM-1.png.png',
+                      width: 25,
+                      height: 25,
+                    ),
+                ],
               ),
             ],
           ),
-        ),
-        SizedBox(width: 5),
-        Row(
-          children: [
-            Text(_game.roundOver ? "" : "Bet: ${curHand.bet}",
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-                fontFamily: 'Minecraft',
-                shadows: [
-                  Shadow(
-                    offset: Offset(2.4, 2.4),
-                    blurRadius: 0,
-                    color: Color.fromRGBO(63, 63, 63, 1),
-                  ),
-                ],
-              ),
-            ),
-            SizedBox(width: 5),
-            Image.asset(
-              'assets/Screenshot 2025-04-23 at 4.03.13 PM-1.png.png',
-              width: 25,
-              height: 25,
-            ),
-          ],
         ),
       ],
     );
