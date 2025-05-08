@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:jackblack/gameplay_instructions.dart';
 import 'package:jackblack/modepage.dart';
 import 'package:jackblack/users/auth_service.dart';
+import 'package:jackblack/users/register_page.dart';
 import 'package:jackblack/widgets/custom_button.dart';
 
 class TitlePage extends StatefulWidget {

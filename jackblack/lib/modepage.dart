@@ -125,25 +125,23 @@ class _ModePageState extends State<ModePage> {
             ),
             const SizedBox(height: 25),
             CustomButton(
-              text: "Host Game",
-              width: 302,
-              onPressed: () => _handleRoomAction(context, true),
-            ),
-            const SizedBox(height: 25),
-            CustomButton(
-              text: "Join Game",
-              width: 302,
-              onPressed: () => _handleRoomAction(context, false),
-            ),
-            const SizedBox(height: 25),
-            CustomButton(
-              text: "Back",
+              text: "Open Rooms",
               width: 302,
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const TitlePage()),
+                  MaterialPageRoute(
+                    builder: (context) => RoomSelectionPage(isHosting: true),
+                  ),
                 );
+              },
+            ),
+            SizedBox(height: 25),
+            CustomButton(
+              text: "Back",
+              width: 302,
+              onPressed: () {
+                Navigator.pop(context);
               },
             ),
           ],

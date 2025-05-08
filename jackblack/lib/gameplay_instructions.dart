@@ -124,10 +124,7 @@ class GameplayInstructions extends StatelessWidget {
               fontSize: 20,
               width: 270, // Set the same width as the previous button
               onPressed: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => const TitlePage()),
-                );
+                Navigator.pop(context);
               },
             ),
             const SizedBox(height: 20),
