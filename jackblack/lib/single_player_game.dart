@@ -321,7 +321,7 @@ class _SinglePlayerState extends State<SinglePlayer> {
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 14,
-                      color: Colors.white,
+                      color: (player.hands[index ~/ 2].isStanding) ?const Color.fromARGB(255, 164, 164, 164) : Colors.white,
                       fontFamily: 'Minecraft',
                       shadows: [Shadow(offset: Offset(2, 2), blurRadius: 0, color: Color.fromRGBO(63, 63, 63, 1))]
                     ),
@@ -447,7 +447,7 @@ class _SinglePlayerState extends State<SinglePlayer> {
                     child: Text(player.hands[index ~/ 2].handResult,
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        fontSize: 24,
+                        fontSize: (player.hands.length == 3) ? 14 : 24,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                         fontFamily: 'Minecraft',
@@ -461,6 +461,17 @@ class _SinglePlayerState extends State<SinglePlayer> {
               }),
               SizedBox(width: 12),
             ]
+          ),
+          SizedBox(height: 20),
+          Text(player.gameEndMessage,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: (player.hands.length == 3) ? 14 : 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+              fontFamily: 'Minecraft',
+              shadows: [Shadow(offset: Offset(3, 2.7), blurRadius: 0, color: Color.fromRGBO(63, 63, 63, 1))]
+            ),
           ),
           SizedBox(height: 20),
           Row(

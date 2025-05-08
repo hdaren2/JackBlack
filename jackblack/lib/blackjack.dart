@@ -107,6 +107,7 @@ class BlackJack {
     if(p.hands[0].length == 2 && p.hands[0].sum == 21){
       p.hands[0].handResult = "Blackjack! You win!";
       p.funds += (p.hands[0].bet * 2.5);
+      p.amountWon += (p.hands[0].bet * 2.5);
       p.isDone = true;
       nextPlayer();
     }
@@ -121,21 +122,13 @@ class BlackJack {
       }
       dealer.add(shoe.deal());
       dealer.add(shoe.deal());
-      //check if anyone got blackjack
-      for (final player in players) {
-        checkInitialBlackjack(player);
-      }
   }
 
   void startGame(){
     resetGame();
     dealFirstCards();
   }
-
-  // @override
-  // void initState() {
-  //   startGame();
-  // }
+  
 
   void checkHandVsDealer(Player p, Hand h){
     //check if hand has insurance and pay if necessary
@@ -144,6 +137,7 @@ class BlackJack {
       if(dealer.hand[0].value == 11 && dealer.hand[1].value == 10) {
         //pay insurance
         p.funds += 2*h.insurance;
+        p.amountWon = 2*h.insurance;
       }
     }
     //if theres already a hand message, dont need to check
@@ -153,14 +147,17 @@ class BlackJack {
     if (dealerScore > 21) {
       h.handResult = "Dealer busted with $dealerScore! You win!";
       p.funds += 2 * h.bet;
+      p.amountWon += 2 * h.bet;
     } else if (playerScore > dealerScore) {
       h.handResult = "You win! $playerScore vs $dealerScore";
       p.funds += 2 * h.bet;
+      p.amountWon += 2 * h.bet;
     } else if (playerScore < dealerScore) {
       h.handResult = "Dealer wins! $dealerScore vs $playerScore";
     } else if (playerScore == dealerScore) {
       h.handResult = "It's a tie! $playerScore vs $playerScore";
       p.funds += h.bet;
+      p.amountWon += h.bet;
     }
   }
 
@@ -170,30 +167,38 @@ class BlackJack {
       for (final hand in player.hands) {
           checkHandVsDealer(player, hand); 
       }
+      player.gameEndMessage = "You ${player.amountWon > 0 ? "won" : "lost"} \$${player.amountWon.abs()}";
+      player.amountWon = 0;
     }
+    
   }
 
   void hit() {
-    curPlayer.hit(curHand, shoe);
+    if(curHand.length <= 12)
+      curPlayer.hit(curHand, shoe);
     int playerScore = curHand.sum;
     if (playerScore > 21) {
       curHand.handResult = "You busted with $playerScore! Dealer wins.";
       nextHand();
     } else if (playerScore == 21) {
+      curHand.isStanding = true;
       if(curHand.length == 2){
         curHand.handResult = "Blackjack from a split! Wow!";
         curPlayer.funds += curHand.bet * 2.5;
+        curPlayer.amountWon += curHand.bet * 2.5;
       }
       nextHand();
     }
   }
 
   void stand() {
+    curHand.isStanding = true;
     nextHand();
   }
 
   void surrender(Hand h) {
     curPlayer.surrender(h);
+    curPlayer.amountWon += h.bet/2;
     nextHand();
   }
 
@@ -201,6 +206,7 @@ class BlackJack {
       if (curHand.sum <= 11 && curHand.length == 2) {
           curPlayer.doubleDown(curHand);
           curHand.add(shoe.deal());
+          curPlayer.amountWon -= curHand.bet;
         nextHand();
       }
   }
@@ -210,6 +216,7 @@ class BlackJack {
     String dealerRank = dealer.hand[0].rank;
     if (dealerRank == "A" && curPlayer.hands.length == 1 && curHand.insurance == 0) {
       curPlayer.insurance(curHand);
+      curPlayer.amountWon -= curHand.bet/2;
     }
   }
 
@@ -226,21 +233,25 @@ class BlackJack {
       //gets too unwiedly after that and most casinos do 4 hands so its close enough
       if (handLength <= 2 && curHand.hand[0].value == curHand.hand[1].value && curPlayer.hands.length <= 3) {
         curPlayer.split(curHand);
+        curPlayer.amountWon -= curHand.bet;
       }
   }
 
   void addToInitialBet(Player p, double amount) {
       initialBet += amount;
       p.funds -= amount;
+      p.amountWon -= amount;
   }
 
   void subFromInitialBet(Player p, double amount){
       initialBet -= amount;
       p.funds += amount;
+      p.amountWon += amount;
   }
 
   void resetInitialBet(Player p) {
       p.funds += initialBet;
+      p.amountWon += initialBet;
       initialBet = 0;
       betMessage = "";
   }
@@ -260,6 +271,10 @@ class BlackJack {
       }
       else {
         curHand.bet = initialBet;
+        //check if anyone got blackjack
+        for (final player in players) {
+          checkInitialBlackjack(player);
+        }
         initialBet = 0;
         betMessage = "";
         curPlayerIndex++;
