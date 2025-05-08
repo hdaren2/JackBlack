@@ -94,6 +94,7 @@ class _SinglePlayerState extends State<SinglePlayer> {
 
   void confirmInitialBet() {
     setState(() {
+      _isInitialDeal = true;
       _game.confirmInitialBet(player);
     });
   }
@@ -107,11 +108,11 @@ class _SinglePlayerState extends State<SinglePlayer> {
           child: Column(
             children: [
               SizedBox(
-                height: MediaQuery.of(context).size.height * 0.07,
+                height: MediaQuery.of(context).size.height * 0.09,
                 child: _buildStatsSection(),
               ),
               SizedBox(
-                height: MediaQuery.of(context).size.height * 0.68,
+                height: MediaQuery.of(context).size.height * 0.66,
                 child: _buildGameSection(),
               ),
               SizedBox(
@@ -241,7 +242,7 @@ class _SinglePlayerState extends State<SinglePlayer> {
             fontFamily: 'Minecraft',
             shadows: [
               Shadow(
-                offset: Offset(2.4, 2.4),
+                offset: Offset(2, 2),
                 blurRadius: 0,
                 color: Color.fromRGBO(63, 63, 63, 1),
               ),
@@ -283,7 +284,7 @@ class _SinglePlayerState extends State<SinglePlayer> {
             fontSize: 14,
             color: Colors.white,
             fontFamily: 'Minecraft',
-            shadows: [Shadow(offset:Offset(2.4, 2.4), blurRadius: 0, color: Color.fromRGBO(63, 63, 63, 1))]
+            shadows: [Shadow(offset:Offset(2, 2), blurRadius: 0, color: Color.fromRGBO(63, 63, 63, 1))]
           ),
         ),
         SizedBox(height: 10),
@@ -322,7 +323,7 @@ class _SinglePlayerState extends State<SinglePlayer> {
                       fontSize: 14,
                       color: Colors.white,
                       fontFamily: 'Minecraft',
-                      shadows: [Shadow(offset: Offset(3, 2.7), blurRadius: 0, color: Color.fromRGBO(63, 63, 63, 1))]
+                      shadows: [Shadow(offset: Offset(2, 2), blurRadius: 0, color: Color.fromRGBO(63, 63, 63, 1))]
                     ),
                   ),
                 );
@@ -568,6 +569,7 @@ Widget _buildStatsSection() {
     return Column(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
+        SizedBox(height: 45),
         Padding(
           padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
           child: Row(
