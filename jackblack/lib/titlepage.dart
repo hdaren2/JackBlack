@@ -4,6 +4,7 @@ import 'package:jackblack/modepage.dart';
 import 'package:jackblack/users/auth_service.dart';
 import 'package:jackblack/users/register_page.dart';
 import 'package:jackblack/widgets/custom_button.dart';
+import 'package:jackblack/Contributorspage.dart';
 
 class TitlePage extends StatefulWidget {
   const TitlePage({super.key});
@@ -102,6 +103,36 @@ class _TitlePageState extends State<TitlePage> {
                         pageBuilder:
                             (context, animation, secondaryAnimation) =>
                                 const GameplayInstructions(),
+                        transitionsBuilder: (
+                          context,
+                          animation,
+                          secondaryAnimation,
+                          child,
+                        ) {
+                          final fadeAnimation = CurvedAnimation(
+                            parent: animation,
+                            curve: Curves.easeInOut,
+                          );
+                          return FadeTransition(
+                            opacity: fadeAnimation,
+                            child: child,
+                          );
+                        },
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 20),
+                CustomButton(
+                  text: "Credits",
+                  width: 200,
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      PageRouteBuilder(
+                        pageBuilder:
+                            (context, animation, secondaryAnimation) =>
+                                const ContributorsPage(),
                         transitionsBuilder: (
                           context,
                           animation,
