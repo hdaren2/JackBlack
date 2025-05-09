@@ -23,7 +23,7 @@ class _TitlePageState extends State<TitlePage> {
       body: Stack(
         children: [
           Positioned(
-            top: 20,
+            top: 50,
             left: 20,
             child: Text(
               "Welcome, $userName!",

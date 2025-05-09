@@ -31,7 +31,7 @@ class ContributorsPage extends StatelessWidget {
             const SizedBox(height: 40),
             // List of contributors
             const Text(
-              "Clevland Martin IV",
+              "Cleveland Martin IV",
               style: TextStyle(
                 fontSize: 24,
                 color: Colors.white,

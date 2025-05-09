@@ -129,7 +129,22 @@ class _MultiPlayerState extends State<MultiPlayer> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              SizedBox(height: 40),
+              Text(
+                "${curPlayer.name}'s Turn",
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.white,
+                  fontFamily: 'Minecraft',
+                  shadows: [
+                    Shadow(
+                      offset: Offset(2, 2),
+                      blurRadius: 0,
+                      color: Color.fromRGBO(63, 63, 63, 1),
+                    ),
+                  ],
+                ),
+              ),
+              //SizedBox(height: 40),
               // Top section - First two player hands
               _buildTopPlayersSection(),
 
