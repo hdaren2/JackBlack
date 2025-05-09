@@ -17,10 +17,10 @@ class MultiPlayer extends StatefulWidget {
 class _MultiPlayerState extends State<MultiPlayer> {
   final BlackJack _game = BlackJack(
     players: [
-      Player(name: "p1", funds: 1000),
-      Player(name: "p2", funds: 1000),
-      Player(name: "p3", funds: 1000),
-      Player(name: "p4", funds: 1000),
+      Player(name: "P1", funds: 1000),
+      Player(name: "P2", funds: 1000),
+      Player(name: "P3", funds: 1000),
+      Player(name: "P4", funds: 1000),
     ],
   );
 
@@ -706,9 +706,15 @@ class PlayerHandDisplay extends StatelessWidget {
             borderRadius: BorderRadius.circular(8),
           ),
           child: Column(
-            children: [
-              Text(
+          children: [
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.center,
+              child: Text(
                 "${player.name} • \$${player.funds} • Bet \$${player.hands[0].bet}",
+                maxLines: 1,
+                softWrap: false,
+                overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
@@ -724,7 +730,8 @@ class PlayerHandDisplay extends StatelessWidget {
                 ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 4),
+            ),
+            const SizedBox(height: 4),
 
               SizedBox(
                 width: cardRowWidth,
