@@ -238,15 +238,26 @@ class BlackJack {
   }
 
   void addToInitialBet(Player p, double amount) {
-      initialBet += amount;
-      p.funds -= amount;
-      p.amountWon -= amount;
+      if (p.funds >= amount) {
+          initialBet += amount;
+          p.funds -= amount;
+          p.amountWon -= amount;
+          betMessage = "";  // Clear any previous error message
+      } else {
+          betMessage = "Insufficient funds.";
+          Future.delayed(const Duration(seconds: 2), () {
+              betMessage = "";
+          });
+      }
   }
 
   void subFromInitialBet(Player p, double amount){
-      initialBet -= amount;
-      p.funds += amount;
-      p.amountWon += amount;
+      if (amount <= initialBet) {  // Make sure we don't subtract more than what's bet
+          initialBet -= amount;
+          p.funds += amount;
+          p.amountWon += amount;
+          betMessage = "";  // Clear any previous error message
+      }
   }
 
   void resetInitialBet(Player p) {
@@ -258,31 +269,26 @@ class BlackJack {
 
   void confirmInitialBet(Player p) {
       if (initialBet == 0) {
-        betMessage = "Bet must be more than 0.";
-        Future.delayed(const Duration(seconds: 2), () {
-            betMessage = "";
+          betMessage = "Bet must be more than 0.";
+          Future.delayed(const Duration(seconds: 2), () {
+              betMessage = "";
           });
+          return;
       }
-      else if (initialBet > p.funds) {
-        betMessage = "Insufficient funds.";
-        Future.delayed(const Duration(seconds: 2), () {
-            betMessage = "";
-        });
-      }
-      else {
-        curHand.bet = initialBet;
-        //check if anyone got blackjack
-        for (final player in players) {
+      
+      // No need to check funds here since we already check in addToInitialBet
+      curHand.bet = initialBet;
+      //check if anyone got blackjack
+      for (final player in players) {
           checkInitialBlackjack(player);
-        }
-        initialBet = 0;
-        betMessage = "";
-        curPlayerIndex++;
-        //if all players bet, then showBetPrompt is false and reset stuff
-        if(curPlayerIndex == players.length){
+      }
+      initialBet = 0;
+      betMessage = "";
+      curPlayerIndex++;
+      //if all players bet, then showBetPrompt is false and reset stuff
+      if(curPlayerIndex == players.length){
           curPlayerIndex = 0;
           showBetPrompt = false;
-        }
       }
   }
 }
