@@ -8,6 +8,7 @@ class CustomTextBox extends StatelessWidget {
     this.fontSize = 18,
     this.width,
     this.height,
+    this.hidden = false,
   });
 
   final TextEditingController controller;
@@ -15,6 +16,7 @@ class CustomTextBox extends StatelessWidget {
   final double fontSize;
   final double? width;
   final double? height;
+  final bool hidden;
 
   @override
   Widget build(BuildContext context) {
@@ -33,6 +35,7 @@ class CustomTextBox extends StatelessWidget {
         boxShadow: [BoxShadow(color: Colors.grey.shade900, spreadRadius: 3)],
       ),
       child: TextField(
+        obscureText: hidden,
         controller: controller,
         style: TextStyle(
           fontSize: fontSize,

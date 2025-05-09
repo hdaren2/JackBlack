@@ -351,6 +351,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           hintText: "Password",
                           fontSize: 18,
                           width: MediaQuery.of(context).size.width * 0.7,
+                          hidden: true
                         ),
                         SizedBox(height: 30),
                         CustomButton(
@@ -406,6 +407,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           hintText: "Password",
                           fontSize: 18,
                           width: MediaQuery.of(context).size.width * 0.7,
+                          hidden: true
                         ),
                         SizedBox(height: 15),
                         RichText(
