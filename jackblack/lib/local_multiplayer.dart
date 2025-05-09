@@ -157,11 +157,11 @@ class _MultiPlayerState extends State<MultiPlayer> {
             ? _game.players.sublist(0, min(2, _game.players.length))
             : _game.players;
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+      padding: const EdgeInsets.symmetric(horizontal: 2.0, vertical: 8.0),
       child: Column(
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               ...topPlayers.map(
@@ -383,11 +383,11 @@ Widget _buildBottomPlayersSection() {
   }
 
   return Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+    padding: const EdgeInsets.symmetric(horizontal: 2.0, vertical: 8.0),
     child: Column(
       children: [
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             for (var player in bottomPlayers)
@@ -395,10 +395,7 @@ Widget _buildBottomPlayersSection() {
             if (bottomPlayers.length < 2) Expanded(child: Container()),
           ],
         ),
-
         SizedBox(height: 8),
-
-        // Their sums underneath
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -694,45 +691,43 @@ class PlayerHandDisplay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 6.0),
+      padding: const EdgeInsets.symmetric(horizontal: 2.0),
       child: LayoutBuilder(builder: (context, constraints) {
-        // Reserve a bit of space for padding
-        final double cardRowWidth = constraints.maxWidth - 16;
+        final double cardRowWidth = constraints.maxWidth;
 
         return Container(
-          padding: const EdgeInsets.all(8),
+          padding: const EdgeInsets.all(4),
           decoration: BoxDecoration(
             color: const Color.fromRGBO(23, 107, 61, 1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Column(
-          children: [
-            FittedBox(
-              fit: BoxFit.scaleDown,
-              alignment: Alignment.center,
-              child: Text(
-                "${player.name} • \$${player.funds} • Bet \$${player.hands[0].bet}",
-                maxLines: 1,
-                softWrap: false,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                  fontFamily: 'Minecraft',
-                  shadows: [
-                    Shadow(
-                      offset: Offset(1, 1),
-                      blurRadius: 0,
-                      color: Color.fromRGBO(63, 63, 63, 1),
-                    ),
-                  ],
+            children: [
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.center,
+                child: Text(
+                  "${player.name} • \$${player.funds} • Bet \$${player.hands[0].bet}",
+                  maxLines: 1,
+                  softWrap: false,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    fontFamily: 'Minecraft',
+                    shadows: [
+                      Shadow(
+                        offset: Offset(1, 1),
+                        blurRadius: 0,
+                        color: Color.fromRGBO(63, 63, 63, 1),
+                      ),
+                    ],
+                  ),
+                  textAlign: TextAlign.center,
                 ),
-                textAlign: TextAlign.center,
               ),
-            ),
-            const SizedBox(height: 4),
-
+              const SizedBox(height: 4),
               SizedBox(
                 width: cardRowWidth,
                 child: CardRow(
@@ -740,7 +735,7 @@ class PlayerHandDisplay extends StatelessWidget {
                   cards: player.hands[0].hand
                       .map((card) => PlayingCardWidget(card: card, width: 65))
                       .toList(),
-                  cardSpacing: 16, 
+                  cardSpacing: 8,
                   cardWidth: 65,
                 ),
               ),
