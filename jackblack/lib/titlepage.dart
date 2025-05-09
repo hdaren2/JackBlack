@@ -46,7 +46,7 @@ class _TitlePageState extends State<TitlePage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const Text(
-                  "Jack Black Blackjack",
+                  "Jack",
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 40,
